@@ -15,6 +15,7 @@ $language['main'] = 'Главная';
 $language['userProfile'] = 'Профиль %1$s';
 $language['clanProfile'] = 'Клан %1$s';
 $language['levelProfile'] = 'Уровень %1$s';
+$language['listProfile'] = 'Список уровней %1$s';
 $language['nothingIsPlaying'] = 'Ничего не играет...';
 $language['manage'] = 'Управление';
 $language['view'] = 'Посмотреть';
@@ -34,6 +35,7 @@ $language['yourSFXsTitle'] = 'Ваши звуковые эффекты';
 $language['browse'] = 'Просмотр';
 $language['levelsTitle'] = 'Уровни';
 $language['songsTitle'] = 'Песни';
+$language['sfxsTitle'] = 'Звуковые эффекты';
 
 $language['messengerTitle'] = 'Мессенджер';
 $language['loginToAccountTitle'] = 'Войти в аккаунт';
@@ -65,6 +67,10 @@ $language['errorCommentingIsDisabled'] = 'Комментирование отк�
 $language['errorLevelCommentingIsDisabled'] = 'Комментирование этого уровня отключено.';
 $language['errorListCommentingIsDisabled'] = 'Комментирование этого списка отключена.';
 
+$language['errorCantDeletePost'] = 'Вы не можете удалить этот пост.';
+$language['errorBadPost'] = 'Ваш пост содержит плохие слова.';
+$language['errorPostingIsDisabled'] = 'Выкладывание постов отключение.';
+
 $language['errorSongNotFound'] = 'Песня не найдена!';
 
 /* Success strings */
@@ -82,6 +88,11 @@ $language['successUploadedComment'] = 'Вы успешно выложили ко
 
 $language['successFavouritedSong'] = 'Вы успешно добавили эту песню в любимые!';
 $language['successUnfavouritedSong'] = 'Вы успешно убрали эту песню из любимых!';
+
+$language['successAppliedSettings'] = 'Вы успешно применили настройки!';
+
+$language['successDeletedPost'] = 'Вы удалили этот пост!';
+$language['successUploadedPost'] = 'Вы успешно выложили пост!';
 
 /* Page strings */
 $language['changeUsernameOld'] = 'Старый никнейм';
@@ -101,7 +112,12 @@ $language['levelLength'] = 'Длительность';
 $language['downloads'] = 'Загрузки';
 $language['likes'] = 'Лайки';
 $language['dislikes'] = 'Дизлайки';
+$language['rating'] = 'Оценка';
 $language['viewLevel'] = 'Посмотреть уровень';
+$language['viewComments'] = 'Посмотреть комментарии';
+$language['viewLeaderboards'] = 'Посмотреть рекорды';
+$language['viewSongs'] = 'Посмотреть песни';
+$language['viewSFXs'] = 'Посмотреть звуковые эффекты';
 $language['unknownSong'] = 'Неизвестная песня';
 $language['uploadDate'] = 'Дата публикации';
 $language['noLevels'] = 'Уровней нет!';
@@ -128,6 +144,7 @@ $language['attempts'] = 'Попытки';
 $language['coins'] = 'Монетки';
 $language['clicks'] = 'Клики';
 $language['time'] = 'Время';
+$language['points'] = 'Очки';
 
 $language['writeSomething'] = 'Напишите что-нибудь!';
 $language['bannedToast'] = 'Вы заблокированы: "%1$s", бан пройдёт %2$s'; // %1$s — ban reason, %2$s — in X time
@@ -181,4 +198,37 @@ $language['levelLengthPlatformerDesc'] = 'Уровни-платформеры';
 
 $language['resetFilters'] = 'Сбросить фильтры';
 $language['applyFilters'] = 'Применить фильтры';
+
+$language['reset'] = 'Сбросить';
+$language['applySettings'] = 'Применить настройки';
+
+$language['noPosts'] = 'Постов нет!';
+$language['accountID'] = 'ID аккаунта';
+$language['userID'] = 'ID пользователя';
+$language['moons'] = 'Луны';
+$language['diamonds'] = 'Алмазы';
+$language['goldCoins'] = 'Золотые монетки';
+$language['userCoins'] = 'Пользовательские монетки';
+$language['demons'] = 'Демоны';
+$language['creatorPoints'] = 'Креатор Поинты';
+$language['registerDate'] = 'Дата регистрации';
+$language['personPosts'] = 'Посты пользователя';
+$language['personComments'] = 'Комментарии пользователя';
+$language['personScores'] = 'Рекорды пользователя';
+$language['personSongs'] = 'Песни пользователя';
+$language['personSFXs'] = 'Звуковые эффекты пользователя';
+$language['personBans'] = 'Баны пользователя';
+
+$language['unknownLevel'] = 'Неизвестный уровень';
+$language['unknownList'] = 'Неизвестный список уровней';
+
+$language['sfxID'] = 'ID звукового эффекта';
+$language['noSFXs'] = 'Звуковых эффектов нет!';
+$language['downloadSFX'] = 'Скачать звуковой эффект';
+$language['editSFX'] = 'Изменить звуковой эффект';
+$language['library'] = 'Библиотека';
+
+$language['rank'] = 'Ранк';
+
+$language['manageAccount'] = 'Управление аккаунтом';
 ?>

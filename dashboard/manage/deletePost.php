@@ -9,16 +9,14 @@ $sec = new Security();
 $person = Dashboard::loginDashboardUser();
 if(!$person['success']) exit(Dashboard::renderToast("xmark", Dashboard::string("errorLoginRequired"), "error", "account/login"));
 
-if(isset($_POST['scoreID'])) {
-	$scoreID = Escape::number($_POST['scoreID']);
-	$isPlatformer = abs(Escape::number($_POST['isPlatformer']) ?: 0);
+if(isset($_POST['postID'])) {
+	$postID = Escape::number($_POST['postID']);
+	if(empty($postID)) exit(Dashboard::renderToast("xmark", Dashboard::string("errorTitle"), "error"));
 	
-	if(empty($scoreID)) exit(Dashboard::renderToast("xmark", Dashboard::string("errorTitle"), "error"));
+	$deleteComment = Library::deleteAccountComment($person, $postID);
+	if(!$deleteComment) exit(Dashboard::renderToast("xmark", Dashboard::string("errorCantDeletePost"), "error"));
 	
-	$deleteScore = Library::deleteScore($person, $scoreID, $isPlatformer);
-	if(!$deleteScore) exit(Dashboard::renderToast("xmark", Dashboard::string("errorCantDeleteScore"), "error"));
-	
-	exit(Dashboard::renderToast("check", Dashboard::string("successDeletedScore"), "success", '@'));
+	exit(Dashboard::renderToast("check", Dashboard::string("successDeletedPost"), "success", '@'));
 }
 
 exit(Dashboard::renderToast("xmark", Dashboard::string("errorTitle"), "error"));

@@ -1,0 +1,61 @@
+<div class="contentDiv">
+	<div class="horisontal">
+		<div class="vertical">
+			<div class="levelTitle">
+				<h2><text class="big">%SFX_NAME%</text></h2>
+				
+				<button class="contents songButton"
+					dashboard-title="%SFX_NAME%"
+					dashboard-author="%SFX_AUTHOR%"
+					dashboard-url="%SFX_URL%"
+					dashboard-song="%ID%"
+				>
+					<i class="fa-solid fa-circle-play"></i>
+				</button>
+			</div>
+		</div>
+		
+		<button class="button squareButton"
+			onclick="downloadSong('%SFX_AUTHOR%', '%SFX_NAME%', '%SFX_URL%')"
+			title="%TEXT_downloadSFX%"
+		>
+			<i class="fa-solid fa-download"></i>
+		</button>
+		
+		<button class="button squareButton titleToRight"
+			dashboard-show="%SFX_CAN_CHANGE%"
+			onclick="getPage('sfxs/edit')"
+			title="%TEXT_editSFX%"
+		>
+			<i class="fa-solid fa-pencil"></i>
+		</button>
+	</div>
+	
+	<div class="horisontal stats">
+		<div class="songCard">
+			<button class="contents userButton" dashboard-show="%SFX_IS_LOCAL%">%SFX_USER%</button>
+			
+			<text class="levelStat" title="%TEXT_library%" dashboard-hide="%SFX_IS_LOCAL%">
+				<i class="fa-solid fa-list"></i>
+				%SFX_AUTHOR%
+			</text>
+		</div>
+		
+		<div class="levelStats card">
+			<text class="levelStat" title="%TEXT_sfxID%">
+				<i class="fa-solid fa-drum"></i>
+				<text dashboard-copy>%ID%</text>
+			</text>
+		
+			<text class="levelStat" title="%TEXT_uploadDate%" dashboard-show="%SFX_IS_LOCAL%">
+				<i class="fa-solid fa-calendar"></i>
+				<text dashboard-date="%reuploadTime%"></text>
+			</text>
+		
+			<text class="levelStat" title="%TEXT_usageCount%" dashboard-show="%SFX_IS_LOCAL%">
+				<i class="fa-solid fa-gamepad"></i>
+				%levelsCount%
+			</text>
+		</div>
+	</div>
+</div>

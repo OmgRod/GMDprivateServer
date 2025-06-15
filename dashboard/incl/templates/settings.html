@@ -1,4 +1,4 @@
-<div class="wideBox grid">
+<form class="wideBox grid" name="settingsForm" dashboard-change-form>
 	<div class="contentDiv vertical">
 		<div class="settingDescription">
 			<h2>%TEXT_languageTitle%</h2>
@@ -14,7 +14,8 @@
 					<h3>%LANGUAGE_EN%</h3>
 				</div>
 				
-				<input class="radio" type="radio" name="lang" value="EN" dashboard-check-change></input>
+				<input dashboard-show="%SETTING_LANGUAGE_EN_DEFAULT%" dashboard-change-default class="radio" type="radio" name="lang" value="EN"></input>
+				<input dashboard-hide="%SETTING_LANGUAGE_EN_DEFAULT%" class="radio" type="radio" name="lang" value="EN"></input>
 			</div>
 			
 			<div class="languageDiv">
@@ -25,7 +26,8 @@
 					<h3>%LANGUAGE_RU%</h3>
 				</div>
 				
-				<input class="radio" type="radio" name="lang" value="RU" dashboard-check-change></input>
+				<input dashboard-show="%SETTING_LANGUAGE_RU_DEFAULT%" dashboard-change-default class="radio" type="radio" name="lang" value="RU"></input>
+				<input dashboard-hide="%SETTING_LANGUAGE_RU_DEFAULT%" class="radio" type="radio" name="lang" value="RU"></input>
 			</div>
 		</div>
 	</div>
@@ -54,8 +56,13 @@
 			</button>
 		</div>
 	</div>
+</form>
+
+<div class="saveSettingsButtons" dashboard-change-buttons>
+	<button type="button" class="button" onclick="resetSettings()">%TEXT_reset%</button>
+	<button type="button" class="button" onclick="postPage('manage/applySettings', 'settingsForm')">%TEXT_applySettings%</button>
 </div>
 
 <script id="pageScript">
-	document.querySelector("input[type=radio][value=" + localStorage.language + "]").checked = true;
+	document.querySelector(`input[type=radio][value="%LANGUAGE%"]`).checked = true;
 </script>

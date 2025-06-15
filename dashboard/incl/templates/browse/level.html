@@ -40,8 +40,8 @@
 				</text>
 			</div>
 			
-			<div class="levelStat">
-				<text title="%TEXT_downloads%">
+			<div class="levelStat" title="%TEXT_downloads%>
+				<text">
 					<i class="fa-solid fa-reply fa-rotate-270"></i>
 					%downloads%
 				</text>
@@ -56,15 +56,15 @@
 				</text>
 			</div>
 		
-			<div class="levelStat">
-				<text title="%TEXT_levelLength%">
+			<div class="levelStat" title="%TEXT_levelLength%">
+				<text>
 					<i class="fa-solid fa-clock"></i>
 					%LEVEL_LENGTH%
 				</text>
 			</div>
 			
-			<div class="levelStat">
-				<text title="%TEXT_uploadDate%">
+			<div class="levelStat" title="%TEXT_uploadDate%">
+				<text>
 					<i class="fa-solid fa-calendar"></i>
 					<text dashboard-date="%uploadDate%" dashboard-full></text>
 				</text>
@@ -78,44 +78,44 @@
 				<button type="button" class="eyeButton" onclick="showLevelPassword()"><i class="fa-solid fa-eye"></i></button>
 			</div>
 			
-			<div class="levelStat several">
-				<text title="%TEXT_comments%">
+			<div class="levelStat several" title="%TEXT_comments%">
+				<text>
 					<i class="fa-solid fa-comment"></i> %LEVEL_COMMENTS%
 				</text>
 				
-				<button title="%TEXT_view%" type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/comments')"><i class="fa-solid fa-eye"></i></button>
+				<button type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/comments')"><i class="fa-solid fa-eye"></i></button>
 			</div>
 			
-			<div class="levelStat several">
-				<text title="%TEXT_scores%">
+			<div class="levelStat several" title="%TEXT_scores%">
+				<text>
 					<i class="fa-solid fa-chart-simple"></i> %LEVEL_SCORES%
 				</text>
 				
-				<button title="%TEXT_view%" type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/scores')"><i class="fa-solid fa-eye"></i></button>
+				<button type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/scores')"><i class="fa-solid fa-eye"></i></button>
 			</div>
 			
-			<div class="levelStat several">
-				<text title="%TEXT_songs%">
+			<div class="levelStat several" title="%TEXT_songs%">
+				<text>
 					<i class="fa-solid fa-music"></i> %LEVEL_SONGS%
 				</text>
 				
-				<button title="%TEXT_view%" type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/songs')"><i class="fa-solid fa-eye"></i></button>
+				<button type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/songs')"><i class="fa-solid fa-eye"></i></button>
 			</div>
 			
-			<div class="levelStat several">
-				<text title="%TEXT_sfxs%">
+			<div class="levelStat several" title="%TEXT_sfxs%">
+				<text>
 					<i class="fa-solid fa-drum"></i> %LEVEL_SFXS%
 				</text>
 				
-				<button title="%TEXT_view%" type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/sfxs')"><i class="fa-solid fa-eye"></i></button>
+				<button type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/sfxs')"><i class="fa-solid fa-eye"></i></button>
 			</div>
 			
-			<div class="levelStat several" dashboard-show="%LEVEL_CAN_MANAGE%">
+			<div class="levelStat several" dashboard-show="%LEVEL_CAN_MANAGE%" title="%TEXT_manageLevel%">
 				<text>
 					<i class="fa-solid fa-pencil"></i> %TEXT_manage%
 				</text>
 				
-				<button title="%TEXT_manageLevel%" type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/manage')"><i class="fa-solid fa-eye"></i></button>
+				<button type="button" class="eyeButton" onclick="getPage('browse/levels/%levelID%/manage')"><i class="fa-solid fa-eye"></i></button>
 			</div>
 		</div>
 		
@@ -123,7 +123,7 @@
 			<div class="nothingOnPageDiv" dashboard-show="%LEVEL_IS_NOTHING_OPENED%">
 				<i class="fa-solid fa-ellipsis nothing-icon"></i>
 				<h1>%TEXT_nothingOpened%</h1>
-				<i dashboard-has-password="%LEVEL_CAN_SEE_PASSWORD%" class="fa-solid fa-share arrow-icon"></i>
+				<i class="fa-solid fa-share arrow-icon"></i>
 			</div>
 			
 			%LEVEL_ADDITIONAL_PAGE%

@@ -313,10 +313,10 @@ class Library {
 		return $isFriends->fetchColumn() > 0;
 	}
 	
-	public static function getAccountComments($userID, $commentsPage) {
+	public static function getAccountComments($userID, $commentsPage, $mode = 'timestamp') {
 		require __DIR__."/connection.php";
 
-		$accountComments = $db->prepare("SELECT * FROM acccomments WHERE userID = :userID ORDER BY timestamp DESC LIMIT 10 OFFSET ".$commentsPage);
+		$accountComments = $db->prepare("SELECT * FROM acccomments WHERE userID = :userID ".($mode ? 'ORDER BY '.$mode.' DESC' : '')." LIMIT 10 OFFSET ".$commentsPage);
 		$accountComments->execute([':userID' => $userID]);
 		$accountComments = $accountComments->fetchAll();
 		
@@ -402,11 +402,23 @@ class Library {
 	public static function getCommentsOfUser($userID, $sortMode, $pageOffset) {
 		require __DIR__."/connection.php";
 		
-		$comments = $db->prepare("SELECT *, levels.userID AS creatorUserID FROM levels INNER JOIN comments ON comments.levelID = levels.levelID WHERE comments.userID = :userID AND levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0 ORDER BY ".$sortMode." DESC LIMIT 10 OFFSET ".$pageOffset);
+		$comments = $db->prepare("SELECT * FROM comments
+			JOIN (
+				(SELECT levelID AS itemID, levelName COLLATE utf8mb3_unicode_ci AS itemName, extID AS creatorAccountID FROM levels WHERE levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0)
+				UNION
+				(SELECT listID * -1 AS itemID, listName COLLATE utf8mb3_unicode_ci AS itemName, accountID AS creatorAccountID FROM lists WHERE lists.unlisted = 0)
+			) items ON comments.levelID = items.itemID
+			WHERE comments.userID = :userID ORDER BY ".$sortMode." DESC LIMIT 10 OFFSET ".$pageOffset);
 		$comments->execute([':userID' => $userID]);
 		$comments = $comments->fetchAll();
 		
-		$commentsCount = $db->prepare("SELECT count(*) FROM levels INNER JOIN comments ON comments.levelID = levels.levelID WHERE comments.userID = :userID AND levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0");
+		$commentsCount = $db->prepare("SELECT count(*) FROM comments
+			JOIN (
+				(SELECT levelID AS itemID, levelName COLLATE utf8mb3_unicode_ci AS itemName, extID AS creatorAccountID FROM levels WHERE levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0)
+				UNION
+				(SELECT listID AS itemID, listName COLLATE utf8mb3_unicode_ci AS itemName, accountID AS creatorAccountID FROM lists WHERE lists.unlisted = 0)
+			) items ON comments.levelID = items.itemID
+			WHERE comments.userID = :userID");
 		$commentsCount->execute([':userID' => $userID]);
 		$commentsCount = $commentsCount->fetchColumn();
 		
@@ -445,11 +457,15 @@ class Library {
 		return $bans;
 	}
 	
-	public static function getAllBansFromPerson($person, $personType, $onlyActive = true) {
+	public static function getAllBansFromPerson($person, $onlyActive = true) {
 		require __DIR__."/connection.php";
 		
-		$bans = $db->prepare('SELECT * FROM bans WHERE person = :person AND personType = :personType'.($onlyActive ? ' AND isActive = 1' : '').' ORDER BY timestamp DESC');
-		$bans->execute([':person' => $person, ':personType' => $personType]);
+		$accountID = $person['accountID'];
+		$userID = $person['userID'];
+		$IP = self::convertIPForSearching($person['IP'], true);
+		
+		$bans = $db->prepare('SELECT * FROM bans WHERE ((person = :accountID AND personType = 0) OR (person = :userID AND personType = 1) OR (person = :IP AND personType = 2))'.($onlyActive ? ' AND isActive = 1' : '').' ORDER BY timestamp DESC');
+		$bans->execute([':accountID' => $accountID, ':userID' => $userID, ':IP' => $IP, ':personType' => $personType]);
 		$bans = $bans->fetchAll();
 		
 		return $bans;
@@ -1570,6 +1586,59 @@ class Library {
 		return $getUsers;
 	}
 	
+	public static function getProfileStatsCount($person, $userID) {
+		require __DIR__."/connection.php";
+		
+		if(isset($GLOBALS['core_cache']['profileStatsCount'][$userID])) return $GLOBALS['core_cache']['profileStatsCount'][$userID];
+		
+		$user = self::getUserByID($userID);
+		if(!$user) {
+			$GLOBALS['core_cache']['profileStatsCount'][$userID] = ['posts' => 0, 'comments' => 0, 'scores' => 0, 'songs' => 0, 'sfxs' => 0, 'bans' => 0];
+			return $GLOBALS['core_cache']['profileStatsCount'][$userID];
+		}
+		$accountID = $user['extID'];
+		$IP = self::convertIPForSearching($user['IP']);
+		
+		$postsCount = $db->prepare("SELECT count(*) FROM acccomments WHERE userID = :userID");
+		$postsCount->execute([':userID' => $userID]);
+		$postsCount = $postsCount->fetchColumn();
+		
+		$canSeeCommentHistory = Library::canSeeCommentsHistory($person, $userID);
+		if($canSeeCommentHistory) {		
+			$levelsCommentsCount = $db->prepare("SELECT count(*) FROM users INNER JOIN comments ON comments.userID = users.userID INNER JOIN levels ON levels.levelID = comments.levelID WHERE users.userID = :userID AND levels.unlisted = 0");
+			$levelsCommentsCount->execute([':userID' => $userID]);
+			$levelsCommentsCount = $levelsCommentsCount->fetchColumn();
+			
+			$listsCommentsCount = $db->prepare("SELECT count(*) FROM users INNER JOIN comments ON comments.userID = users.userID INNER JOIN lists ON lists.listID = comments.levelID * -1 WHERE users.userID = :userID AND lists.unlisted = 0");
+			$listsCommentsCount->execute([':userID' => $userID]);
+			$listsCommentsCount = $listsCommentsCount->fetchColumn();
+		} else $levelsCommentsCount = $listsCommentsCount = 0;
+		
+		$levelScoresCount = $db->prepare("SELECT count(*) FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE users.userID = :userID");
+		$levelScoresCount->execute([':userID' => $userID]);
+		$levelScoresCount = $levelScoresCount->fetchColumn();
+		
+		$platformerScoresCount = $db->prepare("SELECT count(*) FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE users.userID = :userID");
+		$platformerScoresCount->execute([':userID' => $userID]);
+		$platformerScoresCount = $platformerScoresCount->fetchColumn();
+		
+		$songsCount = $db->prepare("SELECT count(*) FROM songs WHERE reuploadID = :accountID AND isDisabled = 0");
+		$songsCount->execute([':accountID' => $accountID]);
+		$songsCount = $songsCount->fetchColumn();
+		
+		$SFXsCount = $db->prepare("SELECT count(*) FROM sfxs WHERE reuploadID = :accountID AND isDisabled = 0");
+		$SFXsCount->execute([':accountID' => $accountID]);
+		$SFXsCount = $SFXsCount->fetchColumn();
+		
+		$bansCount = $db->prepare("SELECT count(*) FROM bans WHERE ((person = :accountID AND personType = 0) OR (person = :userID AND personType = 1) OR (person = :IP AND personType = 2))");
+		$bansCount->execute([':accountID' => $accountID, ':userID' => $userID, ':IP' => $IP]);
+		$bansCount = $bansCount->fetchColumn();
+		
+		$GLOBALS['core_cache']['profileStatsCount'][$userID] = ['posts' => $postsCount, 'comments' => $levelsCommentsCount + $listsCommentsCount, 'scores' => $levelScoresCount + $platformerScoresCount, 'songs' => $songsCount, 'sfxs' => $SFXsCount, 'bans' => $bansCount];
+		
+		return $GLOBALS['core_cache']['profileStatsCount'][$userID];
+	}
+	
 	/*
 		Levels-related functions
 	*/
@@ -2522,7 +2591,7 @@ class Library {
 		return false;
 	}
 	
-	public static function getLevelScores($levelID, $person, $type, $dailyID) {
+	public static function getLevelScores($levelID, $person, $type, $dailyID, $pageOffset = false) {
 		require __DIR__."/connection.php";
 		
 		$accountID = $person['accountID'];
@@ -2535,24 +2604,37 @@ class Library {
 				$friendsArray = self::getFriends($accountID);
 				$friendsArray[] = $accountID;
 				$friendsString = "'".implode("','", $friendsArray)."'";
-				$getLevelScores = $db->prepare("SELECT *, levelscores.coins AS scoreCoins FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND accountID IN (".$friendsString.") ORDER BY percent DESC, uploadDate ASC");
-				$getLevelScores->execute([':levelID' => $levelID]);
+				
+				$levelScores = $db->prepare("SELECT *, levelscores.coins AS scoreCoins FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND accountID IN (".$friendsString.") ORDER BY percent DESC, uploadDate ASC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+				$levelScores->execute([':levelID' => $levelID]);
+				
+				$levelScoresCount = $db->prepare("SELECT count(*) FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND accountID IN (".$friendsString.")");
+				$levelScoresCount->execute([':levelID' => $levelID]);
 				break;
 			case 1:
-				$getLevelScores = $db->prepare("SELECT *, levelscores.coins AS scoreCoins FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID ORDER BY percent DESC, uploadDate ASC");
-				$getLevelScores->execute([':levelID' => $levelID]);
+				$levelScores = $db->prepare("SELECT *, levelscores.coins AS scoreCoins FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID ORDER BY percent DESC, uploadDate ASC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+				$levelScores->execute([':levelID' => $levelID]);
+				
+				$levelScoresCount = $db->prepare("SELECT count(*) FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID");
+				$levelScoresCount->execute([':levelID' => $levelID]);
 				break;
 			case 2:
-				$getLevelScores = $db->prepare("SELECT *, levelscores.coins AS scoreCoins FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND uploadDate > :time ORDER BY percent DESC, uploadDate ASC");
-				$getLevelScores->execute([':levelID' => $levelID, ':time' => time() - 604800]);
+				$time = time() - 604800;
+			
+				$levelScores = $db->prepare("SELECT *, levelscores.coins AS scoreCoins FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND uploadDate > :time ORDER BY percent DESC, uploadDate ASC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+				$levelScores->execute([':levelID' => $levelID, ':time' => $time]);
+				
+				$levelScoresCount = $db->prepare("SELECT count(*) FROM levelscores INNER JOIN users ON users.extID = levelscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND uploadDate > :time");
+				$levelScoresCount->execute([':levelID' => $levelID, ':time' => $time]);
 				break;
 			default:
 				return false;
 		}
 		
-		$getLevelScores = $getLevelScores->fetchAll();
+		$levelScores = $levelScores->fetchAll();
+		$levelScoresCount = $levelScoresCount->fetchColumn();
 		
-		return $getLevelScores;
+		return ['scores' => $levelScores, 'count' => $levelScoresCount];
 	}
 	
 	public static function submitPlatformerLevelScore($levelID, $person, $scores, $attempts, $clicks, $progresses, $coins, $dailyID, $mode) {
@@ -2602,7 +2684,7 @@ class Library {
 		return false;
 	}
 	
-	public static function getPlatformerLevelScores($levelID, $person, $type, $dailyID, $mode) {
+	public static function getPlatformerLevelScores($levelID, $person, $type, $dailyID, $mode, $pageOffset = false) {
 		require __DIR__."/connection.php";
 		
 		$accountID = $person['accountID'];
@@ -2616,24 +2698,35 @@ class Library {
 				$friendsArray = self::getFriends($accountID);
 				$friendsArray[] = $accountID;
 				$friendsString = "'".implode("','", $friendsArray)."'";
-				$getLevelScores = $db->prepare("SELECT *, platscores.coins AS scoreCoins FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND accountID IN (".$friendsString.") ORDER BY ".$mode." ".$order.", timestamp ASC");
-				$getLevelScores->execute([':levelID' => $levelID]);
+				
+				$levelScores = $db->prepare("SELECT *, platscores.coins AS scoreCoins FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND accountID IN (".$friendsString.") ORDER BY ".$mode." ".$order.", timestamp ASC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+				$levelScores->execute([':levelID' => $levelID]);
+				
+				$levelScoresCount = $db->prepare("SELECT count(*) FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND accountID IN (".$friendsString.")");
+				$levelScoresCount->execute([':levelID' => $levelID]);
 				break;
 			case 1:
-				$getLevelScores = $db->prepare("SELECT *, platscores.coins AS scoreCoins FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID ORDER BY ".$mode." ".$order.", timestamp ASC");
-				$getLevelScores->execute([':levelID' => $levelID]);
+				$levelScores = $db->prepare("SELECT *, platscores.coins AS scoreCoins FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID ORDER BY ".$mode." ".$order.", timestamp ASC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+				$levelScores->execute([':levelID' => $levelID]);
+				
+				$levelScoresCount = $db->prepare("SELECT count(*) FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID");
+				$levelScoresCount->execute([':levelID' => $levelID]);
 				break;
 			case 2:
-				$getLevelScores = $db->prepare("SELECT *, platscores.coins AS scoreCoins FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND timestamp > :time ORDER BY ".$mode." ".$order.", timestamp ASC");
-				$getLevelScores->execute([':levelID' => $levelID, ':time' => time() - 604800]);
+				$levelScores = $db->prepare("SELECT *, platscores.coins AS scoreCoins FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND timestamp > :time ORDER BY ".$mode." ".$order.", timestamp ASC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+				$levelScores->execute([':levelID' => $levelID, ':time' => time() - 604800]);
+				
+				$levelScoresCount = $db->prepare("SELECT count(*) FROM platscores INNER JOIN users ON users.extID = platscores.accountID WHERE ".$queryText." dailyID ".$condition." 0 AND levelID = :levelID AND timestamp > :time");
+				$levelScoresCount->execute([':levelID' => $levelID, ':time' => time() - 604800]);
 				break;
 			default:
-				return false;
+				return ['scores' => [], 'count' => 0];
 		}
 		
-		$getLevelScores = $getLevelScores->fetchAll();
+		$levelScores = $levelScores->fetchAll();
+		$levelScoresCount = $levelScoresCount->fetchColumn();
 		
-		return $getLevelScores;
+		return ['scores' => $levelScores, 'count' => $levelScoresCount];
 	}
 	
 	public static function getGMDFile($levelID) {
@@ -2751,7 +2844,7 @@ class Library {
 		$deleteScore = $db->prepare("DELETE FROM ".($isPlatformer ? 'plat' : 'level')."scores WHERE ".($isPlatformer ? 'ID' : 'scoreID')." = :scoreID");
 		$deleteScore->execute([':scoreID' => $scoreID]);
 		
-		self::logAction($person, ModeratorAction::LevelScoreDelete, $getScore['percent'] ?: '', $getScore['attempts'] ?: '', $getScore['coins'] ?: '', $getScore['clicks'] ?: '', $getScore['time'] ?: '', $getScore['points'] ?: '');
+		self::logModeratorAction($person, ModeratorAction::LevelScoreDelete, $getScore['percent'] ?: '', $getScore['attempts'] ?: '', $getScore['coins'] ?: '', $getScore['clicks'] ?: '', $getScore['time'] ?: '', $getScore['points'] ?: '');
 		
 		return true;
 	}
@@ -2794,7 +2887,7 @@ class Library {
 		}
 		
 		if(isset($query["song"])) {
-			$song = Escape::number($query["song"]);
+			$song = abs(Escape::number($query["song"]) ?: 0);
 			if(!isset($query["customSong"])) {
 				$song = $song - 1;
 				$filters[] = "audioTrack = '".$song."' AND songID = 0";
@@ -2806,7 +2899,7 @@ class Library {
 		if(isset($query["noStar"]) && $query["noStar"] == 1) $filters[] = "starStars = 0";
 		
 		if(isset($query["gauntlet"]) && $query["gauntlet"] != 0) {
-			$gauntletID = Escape::number($query["gauntlet"]);
+			$gauntletID = abs(Escape::number($query["gauntlet"]));
 			
 			$gauntlet = self::getGauntletByID($gauntletID);
 			$str = $gauntlet["level1"].",".$gauntlet["level2"].",".$gauntlet["level3"].",".$gauntlet["level4"].",".$gauntlet["level5"];
@@ -2862,6 +2955,40 @@ class Library {
 			'filters' => $filters,
 			'type' => $type
 		];
+	}
+	
+	public static function getUserLevelScores($accountID, $pageOffset = false) {
+		require __DIR__."/connection.php";
+		
+		$levelScores = $db->prepare("SELECT scoreID, accountID, levelscores.levelID, levelName, percent, attempts, coins AS scoreCoins, clicks, time, progresses COLLATE utf8mb3_general_ci AS progresses, dailyID, uploadDate AS timestamp, 0 AS points, 0 AS isPlatformer FROM levelscores
+			JOIN (SELECT levelID, levelName FROM levels WHERE levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0) levels ON levelscores.levelID = levels.levelID
+			WHERE accountID = :accountID
+			
+			UNION
+			
+			SELECT ID AS scoreID, accountID, platscores.levelID, levelName, 0 AS percent, attempts, coins AS scoreCoins, clicks, time, progresses COLLATE utf8mb3_general_ci AS progresses, dailyID, timestamp, points, 1 AS isPlatformer FROM platscores
+			JOIN (SELECT levelID, levelName FROM levels WHERE levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0) levels ON platscores.levelID = levels.levelID
+			WHERE accountID = :accountID
+			
+			ORDER BY timestamp DESC".($pageOffset !== false ? ' LIMIT 10 OFFSET '.$pageOffset : ''));
+		$levelScores->execute([':accountID' => $accountID]);
+		$levelScores = $levelScores->fetchAll();
+		
+		$levelScoresCount = $db->prepare("SELECT count(*) FROM (
+			SELECT scoreID, accountID, levelscores.levelID, levelName, percent, attempts, coins AS scoreCoins, clicks, time, progresses COLLATE utf8mb3_general_ci AS progresses, dailyID, uploadDate AS timestamp, 0 AS points, 0 AS isPlatformer FROM levelscores
+			JOIN (SELECT levelID, levelName FROM levels WHERE levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0) levels ON levelscores.levelID = levels.levelID
+			WHERE accountID = :accountID
+			
+			UNION
+			
+			SELECT ID AS scoreID, accountID, platscores.levelID, levelName, 0 AS percent, attempts, coins AS scoreCoins, clicks, time, progresses COLLATE utf8mb3_general_ci AS progresses, dailyID, timestamp, points, 1 AS isPlatformer FROM platscores
+			JOIN (SELECT levelID, levelName FROM levels WHERE levels.unlisted = 0 AND levels.unlisted2 = 0 AND levels.isDeleted = 0) levels ON platscores.levelID = levels.levelID
+			WHERE accountID = :accountID
+		) count");
+		$levelScoresCount->execute([':accountID' => $accountID]);
+		$levelScoresCount = $levelScoresCount->fetchColumn();
+		
+		return ['scores' => $levelScores, 'count' => $levelScoresCount];
 	}
 	
 	/*
@@ -3226,6 +3353,21 @@ class Library {
 		return $isSent > 0;
 	}
 	
+	public static function cacheListsByID($listIDs) {
+		require __DIR__."/connection.php";
+		require_once __DIR__."/exploitPatch.php";
+		
+		$listIDsString = Escape::multiple_ids(implode(',', $listIDs));
+		
+		$getLists = $db->prepare("SELECT * FROM lists WHERE listID IN (".$listIDsString.")");
+		$getLists->execute();
+		$getLists = $getLists->fetchAll();
+		
+		foreach($getLists AS &$list) $GLOBALS['core_cache']['lists'][$list['listID']] = $list;
+		
+		return $getLists;
+	}
+	
 	/*
 		Audio-related functions
 	*/
@@ -3278,8 +3420,8 @@ class Library {
 		$sfx = $sfx->fetch();
 		
 		if(!$sfx) {
-			$song = self::getLibrarySongInfo($sfxID, 'sfx');
-			$isLocalSFX = false;
+			$sfx = self::getLibrarySongInfo($sfxID, 'sfx');
+			$isLocalSFX = $sfx['isLocalSFX'];
 		}
 		
 		if(!$sfx) {
@@ -3291,7 +3433,7 @@ class Library {
 		$GLOBALS['core_cache']['sfxs'][$sfxID] = $sfx;
 		
 		if($column != "*") return $sfx[$column];
-		else return array("isLocalSFX" => $isLocalSFX, "ID" => $sfx["ID"], "name" => $sfx["name"], "authorName" => $sfx["authorName"], "size" => $sfx["size"], "download" => $sfx["download"], "reuploadTime" => $sfx["reuploadTime"], "reuploadID" => $sfx["reuploadID"]);
+		else return ["isLocalSFX" => $isLocalSFX, "ID" => $sfx["ID"], "name" => $sfx["name"], "authorName" => $sfx["authorName"], "size" => $sfx["size"], "download" => $sfx["download"], "reuploadTime" => $sfx["reuploadTime"], "reuploadID" => $sfx["reuploadID"], "levelsCount" => $sfx["levelsCount"] ?: 0];
 	}
 	
 	public static function getSongString($songID) {
@@ -3344,11 +3486,7 @@ class Library {
 			$serverIDs[$customLib[2]] = $customLib[0];
 		}
 		
-		if(!isset($GLOBALS['core_cache']['libraryFile'][$type])) {
-			$library = json_decode(file_get_contents(__DIR__.'/../../'.$type.'/ids.json'), true);
-			
-			$GLOBALS['core_cache']['libraryFile'][$type] = $library;
-		} else $library = $GLOBALS['core_cache']['libraryFile'][$type];
+		$library = self::getLibrary($type);
 		
 		if(!isset($library['IDs'][(int)$audioID]) || ($type == 'music' && $library['IDs'][(int)$audioID]['type'] != 1)) return false;
 		
@@ -3372,9 +3510,12 @@ class Library {
 			$token = self::randomString(22);
 			$expires = time() + 3600;
 			
-			$link = $servers[$SFX['server']] != null ? $servers[$SFX['server']].'/sfx/s'.$SFX['ID'].'.ogg?token='.$token.'&expires='.$expires : self::getSFXByID($SFX['ID'], 'download');
+			$isLocalSFX = $servers[$SFX['server']] == null;
+			if($isLocalSFX) $SFX = self::getSFXByID($SFX['ID']);
 			
-			$sfxArray = ['isLocalSFX' => $servers[$SFX['server']] == null, 'server' => $SFX['server'], 'ID' => $audioID, 'name' => $song['name'], 'download' => $link, 'originalID' => $SFX['ID']];
+			$link = !$isLocalSFX ? $servers[$SFX['server']].'/sfx/s'.$SFX['ID'].'.ogg?token='.$token.'&expires='.$expires : $SFX['download'];
+			
+			$sfxArray = ['isLocalSFX' => $isLocalSFX, 'server' => $SFX['server'] ?: $serverIDs[null], 'ID' => $audioID, 'name' => $SFX['name'], 'authorName' => $serverNames[$SFX['server']], 'download' => $link, 'originalID' => $SFX['ID'], 'reuploadID' => $SFX['reuploadID'] ?: 0, 'reuploadTime' => $SFX['reuploadTime'] ?: 0, 'levelsCount' => $SFX['levelsCount'] ?: 0];
 			
 			$GLOBALS['core_cache']['libraryAudio'][$type][$audioID] = $sfxArray;
 			
@@ -3385,7 +3526,7 @@ class Library {
 	public static function getLibrarySongAuthorInfo($songID) {
 		if(!file_exists(__DIR__.'/../../music/ids.json')) return false;
 		
-		$library = json_decode(file_get_contents(__DIR__.'/../../music/ids.json'), true);
+		$library = self::getLibrary("music");
 		if(!isset($library['IDs'][$songID])) return false;
 		
 		return $library['IDs'][$songID];
@@ -3423,7 +3564,7 @@ class Library {
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => 1
 			]);
-			$newVersion = (int)Escape::number(curl_exec($curl));
+			$newVersion = (int)abs(Escape::number(curl_exec($curl)));
 			curl_close($curl);
 			
 			if($newVersion > $oldVersion[0] || !$oldVersion[0]) {
@@ -3472,7 +3613,9 @@ class Library {
 			if($customLib[2] !== null) {
 				$servers['s'.$customLib[0]] = $customLib[0];
 			}
+			
 			$serverIDs[$customLib[2]] = $customLib[0];
+			
 			if($types[$type] == 'sfx') {
 				if($customLib[3] != 1) $library['folders'][($customLib[0] + 1)] = [
 					'name' => Escape::dat($customLib[1]),
@@ -3509,36 +3652,47 @@ class Library {
 				// SFX library decoding was made by MigMatos, check their ObeyGDBot! https://obeybd.web.app/
 				for($i = 0; $i < count($res); $i++) {
 					$res[$i] = explode(';', $res[$i]);
+					
 					if($i === 0) {
 						$library['version'] = $mainServerTime;
 						$version = explode(',', $res[0][0]);
 						$version[1] = $mainServerTime;
 						$version = implode(',', $version);
 					}
+					
 					for($j = 1; $j <= count($res[$i]); $j++) {
 						$bits = explode(',', $res[$i][$j]);
+						
 						switch($i) {
 							case 0: // File/Folder
 								if(empty(trim($bits[1])) || empty($bits[0]) || !is_numeric($bits[0])) break;
+								
 								if(empty($idsConverter['originalIDs'][$server][$bits[0]])) {
 									$idsConverter['count']++;
+									
 									while(in_array($idsConverter['count'], $skipSFXIDs)) $idsConverter['count']++;
+									
 									$idsConverter['IDs'][$idsConverter['count']] = ['server' => $server, 'ID' => $bits[0], 'name' => $bits[1], 'type' => $bits[2]];
 									$idsConverter['originalIDs'][$server][$bits[0]] = $idsConverter['count'];
 									$bits[0] = $idsConverter['count'];
 								} else {
 									$bits[0] = $idsConverter['originalIDs'][$server][$bits[0]];
+									
 									if(!isset($idsConverter['IDs'][$bits[0]]['name'])) $idsConverter['IDs'][$bits[0]] = ['server' => $server, 'ID' => $bits[0], 'name' => $bits[1], 'type' => $bits[2]];
 								}
+								
 								if($bits[3] != 1) {
 									if(empty($idsConverter['originalIDs'][$server][$bits[3]])) {
 										$idsConverter['count']++;
+										
 										while(in_array($idsConverter['count'], $skipSFXIDs)) $idsConverter['count']++;
+										
 										$idsConverter['IDs'][$idsConverter['count']] = ['server' => $server, 'ID' => $bits[3], 'name' => $bits[1], 'type' => 1];
 										$idsConverter['originalIDs'][$server][$bits[3]] = $idsConverter['count'];
 										$bits[3] = $idsConverter['count'];
 									} else $bits[3] = $idsConverter['originalIDs'][$server][$bits[3]];
 								} else $bits[3] = $server + 1;
+								
 								if($bits[2]) {
 									$library['folders'][$bits[0]] = [
 										'name' => Escape::dat($bits[1]),
@@ -3554,9 +3708,11 @@ class Library {
 										'milliseconds' => (int)$bits[5],
 									];
 								}
+								
 								break;
 							case 1: // Credit
 								if(empty(trim($bits[0])) || empty(trim($bits[1]))) continue 2;
+								
 								$library['credits'][Escape::dat($bits[0])] = [
 									'name' => Escape::dat($bits[0]),
 									'website' => Escape::dat($bits[1]),
@@ -3568,34 +3724,43 @@ class Library {
 				$sfxs = $db->prepare("SELECT sfxs.*, accounts.userName FROM sfxs JOIN accounts ON accounts.accountID = sfxs.reuploadID WHERE isDisabled = 0");
 				$sfxs->execute();
 				$sfxs = $sfxs->fetchAll();
+				
 				$folderID = $gdpsLibrary = [];
 				$server = $serverIDs[null];
+				
 				foreach($sfxs AS &$customSFX) {
 					if(!isset($folderID[$customSFX['reuploadID']])) {
 						if(empty($idsConverter['originalIDs'][$server][$customSFX['reuploadID']])) {
 							$idsConverter['count']++;
 							$idsConverter['IDs'][$idsConverter['count']] = ['server' => $server, 'ID' => $customSFX['ID'], 'name' => $customSFX['userName'].'\'s SFXs', 'type' => 1];
 							$idsConverter['originalIDs'][$server][$customSFX['reuploadID']] = $idsConverter['count'];
+							
 							$newID = $idsConverter['count'];
 						} else $newID = $idsConverter['originalIDs'][$server][$customSFX['reuploadID']];
+						
 						$library['folders'][$newID] = [
 							'name' => Escape::dat($customSFX['userName']).'\'s SFXs',
 							'type' => 1,
 							'parent' => (int)($server + 1)
 						];
+						
 						$gdpsLibrary['folders'][$newID] = [
 							'name' => Escape::dat($customSFX['userName']).'\'s SFXs',
 							'type' => 1,
 							'parent' => 1
 						];
+						
 						$folderID[$customSFX['reuploadID']] = true;
 					}
+					
 					if(empty($idsConverter['originalIDs'][$server][$customSFX['ID'] + 8000000])) {
 						$idsConverter['count']++;
 						$idsConverter['IDs'][$idsConverter['count']] = ['server' => $server, 'ID' => $customSFX['ID'], 'name' => $customSFX['name'], 'type' => 0];
 						$idsConverter['originalIDs'][$server][$customSFX['ID'] + 8000000] = $idsConverter['count'];
+						
 						$customSFX['ID'] = $idsConverter['count'];
 					} else $customSFX['ID'] = $idsConverter['originalIDs'][$server][$customSFX['ID'] + 8000000];
+					
 					$library['files'][$customSFX['ID']] = $gdpsLibrary['files'][$customSFX['ID']] = [
 						'name' => Escape::dat($customSFX['name']),
 						'type' => 0,
@@ -3620,19 +3785,24 @@ class Library {
 				$version = $mainServerTime;
 				array_shift($res);
 				$x = 0;
+				
 				foreach($res AS &$data) {
 					$data = rtrim($data, ';');
 					$music = explode(';', $data);
+					
 					foreach($music AS &$songString) {
 						$song = explode(',', $songString);
 						$originalID = $song[0];
+						
 						if(empty($song[0]) || !is_numeric($song[0])) continue;
+						
 						if(empty($idsConverter['originalIDs'][$server][$song[0]])) {
 							$idsConverter['count']++;
 							$idsConverter['IDs'][$idsConverter['count']] = ['server' => $server, 'ID' => $song[0], 'type' => $x];
 							$idsConverter['originalIDs'][$server][$song[0]] = $idsConverter['count'];
 							$song[0] = $idsConverter['count'];
 						} else $song[0] = $idsConverter['originalIDs'][$server][$song[0]];
+						
 						switch($x) {
 							case 0:
 								$idsConverter['IDs'][$song[0]] = $library['authors'][$song[0]] = [
@@ -3652,8 +3822,10 @@ class Library {
 									$idsConverter['originalIDs'][$server][$song[2]] = $idsConverter['count'];
 									$song[2] = $idsConverter['count'];
 								} else $song[2] = $idsConverter['originalIDs'][$server][$song[2]];
+								
 								$tags = explode('.', $song[5]);
 								$newTags = [];
+								
 								foreach($tags AS &$tag) {
 									if(empty($tag)) continue;
 									if(empty($idsConverter['originalIDs'][$server][$tag])) {
@@ -3664,10 +3836,13 @@ class Library {
 									} else $tag = $idsConverter['originalIDs'][$server][$tag];
 									$newTags[] = $tag;
 								}
+								
 								$newTags[] = $server;
 								$tags = '.'.implode('.', $newTags).'.';
+								
 								$newArtists = [];
 								$artists = explode('.', $song[7]);
+								
 								foreach($artists AS &$artist) {
 									if(empty($artist)) continue;
 									if(empty($idsConverter['originalIDs'][$server][$artist])) {
@@ -3678,6 +3853,7 @@ class Library {
 									} else $artist = $idsConverter['originalIDs'][$server][$artist];
 									$newArtists[] = $artist;
 								}
+								
 								$artists = implode('.', $newArtists);
 								$idsConverter['IDs'][$song[0]] = $library['songs'][$song[0]] = [
 									'server' => $server,
@@ -3712,11 +3888,14 @@ class Library {
 				$songs = $db->prepare("SELECT songs.*, accounts.userName FROM songs JOIN accounts ON accounts.accountID = songs.reuploadID WHERE isDisabled = 0");
 				$songs->execute();
 				$songs = $songs->fetchAll();
+				
 				$folderID = $accIDs = $gdpsLibrary = [];
 				$c = 100;
+				
 				foreach($songs AS &$customSongs) {
 					$c++;
 					$authorName = trim(Escape::text(Escape::dat(Escape::translit($customSongs['authorName'])), 40));
+					
 					if(empty($authorName)) $authorName = 'Reupload';
 					if(empty($folderID[$authorName])) {
 						$folderID[$authorName] = $c;
@@ -3727,6 +3906,7 @@ class Library {
 							'yt' => ' '
 						];
 					}
+					
 					if(empty($accIDs[$customSongs['reuploadID']])) {
 						$c++;
 						$accIDs[$customSongs['reuploadID']] = $c;
@@ -3735,6 +3915,7 @@ class Library {
 							'name' => Escape::text(Escape::dat($customSongs['userName']), 30),
 						];
 					}
+					
 					$customSongs['name'] = trim(Escape::text(Escape::dat(Escape::translit($customSongs['name'])), 40));
 					$library['songs'][$customSongs['ID']] = $gdpsLibrary['songs'][$customSongs['ID']] = [
 						'ID' => ($customSongs['ID']),
@@ -3750,6 +3931,7 @@ class Library {
 						'priorityOrder' => 0
 					];
 				}
+				
 				$authorsEncrypted = $songsEncrypted = $tagsEncrypted = [];
 				foreach($library['authors'] AS &$authorList) {
 					unset($authorList['server'], $authorList['type'], $authorList['originalID']);
@@ -3947,6 +4129,65 @@ class Library {
 			$increaseFavouriteCount->execute([':songID' => $songID]);
 			return '1';
 		}
+	}
+	
+	public static function getSFXs($filters, $order, $orderSorting, $queryJoin, $pageOffset, $limit = false) {
+		require __DIR__."/connection.php";
+		require __DIR__."/../../config/dashboard.php";
+		
+		$sfxs = $db->prepare("SELECT *, 1 AS isLocalSFX FROM sfxs ".$queryJoin." WHERE (".implode(") AND (", $filters).") AND isDisabled = 0 ".($order ? "ORDER BY ".$order." ".$orderSorting : "")." ".($limit ? "LIMIT ".$limit." OFFSET ".$pageOffset : ''));
+		$sfxs->execute();
+		$sfxs = $sfxs->fetchAll();
+		
+		$serverIDs = [];
+		foreach($customLibrary AS $customLib) $serverIDs[$customLib[2]] = $customLib[0];
+		
+		foreach($sfxs AS &$sfx) {
+			$sfx['originalID'] = $sfx['ID'];
+			$sfx['ID'] = self::getLibraryOriginalID($sfx['ID'] + 8000000, 'sfx', $serverIDs[null]);
+		}
+		
+		$sfxsCount = $db->prepare("SELECT count(*) FROM sfxs ".$queryJoin." WHERE (".implode(" ) AND ( ", $filters).") AND isDisabled = 0");
+		$sfxsCount->execute();
+		$sfxsCount = $sfxsCount->fetchColumn();
+		
+		return ["sfxs" => $sfxs, "count" => $sfxsCount];
+	}
+	
+	public static function getSFXsByLibraryIDs($sfxIDs, $pageOffset, $limit = false) {
+		require __DIR__."/connection.php";
+		
+		$sfxs = [];
+		
+		$currentSFX = 0;
+		
+		foreach($sfxIDs AS &$sfxID) {
+			$currentSFX++;
+			
+			if($currentSFX < $pageOffset) continue;
+			if($limit && $currentSFX > $pageOffset + $limit) break;
+			
+			$sfx = self::getSFXByID($sfxID);
+			$sfxs[] = $sfx;
+		}
+		
+		return ["sfxs" => $sfxs, "count" => count($sfxIDs)];
+	}
+	
+	public static function getLibrary($type) {
+		if(!isset($GLOBALS['core_cache']['libraryFile'][$type])) {
+			$library = json_decode(file_get_contents(__DIR__.'/../../'.$type.'/ids.json'), true);
+			
+			$GLOBALS['core_cache']['libraryFile'][$type] = $library;
+		} else $library = $GLOBALS['core_cache']['libraryFile'][$type];
+		
+		return $library;
+	}
+	
+	public static function getLibraryOriginalID($audioID, $type, $server) {
+		$library = self::getLibrary($type, $server);
+		
+		return $library['originalIDs'][$server][$audioID];
 	}
 	
 	/*

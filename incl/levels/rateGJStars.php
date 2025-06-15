@@ -10,7 +10,7 @@ $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 $levelID = Escape::number($_POST['levelID']);
-$stars = Escape::number($_POST['stars']);
+$stars = abs(Escape::number($_POST['stars']));
 $ratingArray = [0, 1, 2, 3, 3, 4, 4, 5, 5, 5];
 $ratingNumber = $ratingArray[$stars - 1] ?? 0;
 

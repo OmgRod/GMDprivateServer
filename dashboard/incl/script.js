@@ -51,9 +51,9 @@ async function getPage(href, skipCheck = false) {
 	const pageRequest = await fetch(href);
 	const response = await pageRequest.text();
 	
-	await changePage(response, href, skipCheck);
+	const updatePageDetails = await changePage(response, href, skipCheck);
 	
-	dashboardLoader.classList.add("hide");
+	if(updatePageDetails) dashboardLoader.classList.add("hide");
 	
 	return true;
 }
@@ -85,9 +85,9 @@ async function postPage(href, form, showLoadingCircle = true) {
 	
 	href = pageRequest.url;
 	
-	await changePage(response, href);
+	const updatePageDetails = await changePage(response, href);
 	
-	if(showLoadingCircle) dashboardLoader.classList.add("hide");
+	if(updatePageDetails && showLoadingCircle) dashboardLoader.classList.add("hide");
 }
 
 function changePage(response, href, skipCheck = false) {
@@ -108,7 +108,7 @@ function changePage(response, href, skipCheck = false) {
 				className: 'error',
 			}).showToast();
 			
-			return r(false);
+			return r(true);
 		}
 
 		if(!skipCheck) history.pushState(null, null, href);
@@ -119,7 +119,9 @@ function changePage(response, href, skipCheck = false) {
 		document.querySelector("base").replaceWith(newPageBody.querySelector("base"));
 		document.querySelector("title").replaceWith(newPageBody.querySelector("title"));
 		document.querySelector("nav").replaceWith(newPageBody.querySelector("nav"));
-		document.querySelector("#dashboardScript").replaceWith(newPageBody.querySelector("#dashboardScript"));
+		document.getElementById("dashboardScript").replaceWith(newPageBody.getElementById("dashboardScript"));
+		document.getElementById("dashboardStyle").replaceWith(newPageBody.getElementById("dashboardStyle"));
+		
 		if(newPageScript != null) {
 			eval(newPageScript.textContent);
 			newPageScript.remove();
@@ -176,7 +178,7 @@ function showToast(toastBody) {
 		const textStyle = element.getAttribute("dashboard-full") != null ? "long" : "short";
 		
 		element.innerHTML = timeConverter(dateTime, textStyle);
-		intervals[999] = setInterval(async (event) => {
+		intervals[intervals.length] = setInterval(async (event) => {
 			element.innerHTML = timeConverter(dateTime, textStyle);
 		}, 1000);
 		
@@ -192,7 +194,12 @@ function showToast(toastBody) {
 	});
 	
 	const toastLocation = toastBody.getAttribute("location");
-	if(toastLocation.length) getPage(toastLocation);
+	if(toastLocation.length) {
+		getPage(toastLocation);
+		return false;
+	}
+	
+	return true;
 }
 
 async function updatePage() {
@@ -255,13 +262,12 @@ async function updatePage() {
 	const dateElements = dashboardBody.querySelectorAll('[dashboard-date]');
 	dateElements.forEach(async (element) => {
 		const dateTime = element.getAttribute("dashboard-date");
+		const textStyle = element.getAttribute("dashboard-full") != null ? "long" : "short";
 		
 		index++;
 		
-		const textStyle = element.getAttribute("dashboard-full") != null ? "long" : "short";
-		
 		element.innerHTML = timeConverter(dateTime, textStyle);
-		intervals[index] = setInterval(async (event) => {
+		intervals[intervals.length + index] = setInterval(async (event) => {
 			element.innerHTML = timeConverter(dateTime, textStyle);
 		}, 1000);
 		
@@ -295,8 +301,23 @@ async function updatePage() {
 		element.innerHTML = convertSeconds(timeValue);
 	});
 	
-	const checkChangeElements = document.querySelectorAll("[dashboard-check-change]");
-	checkChangeElements.forEach(element => element.onchange = () => checkChangedElements());
+	const checkChangeForms = document.querySelectorAll("[dashboard-change-form]");
+	checkChangeForms.forEach(element => element.onchange = async () => {
+		const checkChangeButtons = document.querySelector("[dashboard-change-buttons]");
+		const formData = new FormData(element);
+		var isFormChanged = false;
+		
+		for await (const entry of formData.entries()) {
+			const entryName = entry[0];
+			const entryValue = entry[1];
+			
+			const elementDefaultValue = element.querySelector(`[name="${entryName}"][dashboard-change-default]`);
+			if(elementDefaultValue != null && entryValue != elementDefaultValue.getAttribute("value")) isFormChanged = true;
+		}
+		
+		if(isFormChanged) checkChangeButtons.classList.add("show");
+		else checkChangeButtons.classList.remove("show");
+	});
 	
 	const pageButtonsElement = document.querySelector("[dashboard-page-buttons]");
 	const pageButtonsDiv = document.querySelector("[dashboard-page-div]");
@@ -458,6 +479,31 @@ async function updatePage() {
 		}
 	}
 	if(updateFilters) updateFilters = false;
+	
+	const contextMenuDivs = document.querySelectorAll("[dashboard-context-div]");
+	contextMenuDivs.forEach(async (element) => {
+		const contextMenuElement = element.querySelector("[dashboard-context-menu]");
+		
+		document.addEventListener('click', () => contextMenuElement.classList.remove("show"));
+		element.onclick = () => contextMenuElement.classList.remove("show");
+		element.oncontextmenu = async (event) => {
+			event.preventDefault();
+			
+			if(!contextMenuElement.classList.contains("show")) {
+				contextMenuElement.style.left = (event.clientX + contextMenuElement.clientWidth + 50 >= window.innerWidth) ? window.innerWidth - contextMenuElement.clientWidth - 50 : event.clientX;
+				contextMenuElement.style.top = (event.clientY + contextMenuElement.clientHeight + 50 >= window.innerHeight) ? window.innerHeight - contextMenuElement.clientHeight - 50 : event.clientY;
+			}
+
+			const contextMenuElements = document.querySelectorAll("[dashboard-context-menu]");
+			contextMenuElements.forEach((contextMenu) => {
+				if(contextMenu !== contextMenuElement) contextMenu.classList.remove("show");
+			});
+
+			contextMenuElement.classList.toggle("show");
+			
+			return false;
+		}
+	});
 }
 
 function timeConverter(timestamp, textStyle = "short") {
@@ -571,16 +617,6 @@ function convertSeconds(time) { // https://stackoverflow.com/a/36981712
 	return minutes + ":" + seconds;
 }
 
-function checkChangedElements() { // Havent finished yet
-	const checkChangeElements = document.querySelectorAll("[dashboard-check-change]");
-	checkChangeElements.forEach(element => {
-		switch(element.type) {
-			case 'radio':
-				
-		}
-	});
-}
-
 function downloadSong(songAuthor, songTitle, songURL) {
 	fakeA = document.createElement("a");
 	fakeA.href = decodeURIComponent(songURL);
@@ -687,4 +723,17 @@ function escapeHTML(text) {
 	};
 	
 	return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+async function resetSettings() {
+	const settingsFormElement = document.querySelector("[dashboard-change-form]");
+	const settingsForm = new FormData(settingsFormElement);
+	
+	const defaultValuesElements = settingsFormElement.querySelectorAll("[dashboard-change-default]");
+	defaultValuesElements.forEach(async(element) => {
+		element.click();
+		element.value = element.getAttribute("value");
+		
+		settingsForm.set(element.name, element.value);
+	});
 }

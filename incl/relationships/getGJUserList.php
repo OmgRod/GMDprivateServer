@@ -22,7 +22,6 @@ switch($type) {
 		break;
 	case 2:
 		exit(CommonError::InvalidRequest);
-	
 }
 
 if(empty($users)) exit(CommentsError::NothingFound);

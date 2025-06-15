@@ -9,8 +9,8 @@ $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 $messagesString = '';
-$getSent = Escape::number($_POST["getSent"]) ?: 0;
-$page = Escape::number($_POST["page"]) ?: 0;
+$getSent = abs(Escape::number($_POST["getSent"]) ?: 0);
+$page = abs(Escape::number($_POST["page"]) ?: 0);
 $pageOffset = $page * 10;
 
 $messages = Library::getAccountMessages($person, $getSent, $pageOffset);

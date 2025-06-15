@@ -9,7 +9,7 @@ $person = Dashboard::loginDashboardUser();
 if(!$person['success']) exit(Dashboard::renderErrorPage(Dashboard::string("favouriteSongsTitle"), Dashboard::string("errorLoginRequired")));
 $accountID = $person['accountID'];
 
-$pageOffset = is_numeric($_GET["page"]) ? (Escape::number($_GET["page"]) - 1) * 10 : 0;
+$pageOffset = is_numeric($_GET["page"]) ? abs(Escape::number($_GET["page"]) - 1) * 10 : 0;
 $page = '';
 
 $songs = Library::getFavouriteSongs($person, $pageOffset, 10);

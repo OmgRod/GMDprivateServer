@@ -16,9 +16,9 @@ $order = "uploadDate";
 $isIDSearch = false;
 $filters = ["unlisted = 0"];
 
-$gameVersion = Escape::number($_POST["gameVersion"]) ?: 0;
-$binaryVersion = Escape::number($_POST["binaryVersion"]) ?: 0;
-$type = Escape::number($_POST["type"]) ?: 0;
+$gameVersion = abs(Escape::number($_POST["gameVersion"]) ?: 0);
+$binaryVersion = abs(Escape::number($_POST["binaryVersion"]) ?: 0);
+$type = abs(Escape::number($_POST["type"]) ?: 0);
 $diff = Escape::multiple_ids($_POST["diff"]) ?: '-';
 
 // Additional search parameters
@@ -45,7 +45,7 @@ switch($diff) {
 
 // Type detection
 $str = Escape::text($_POST["str"]) ?: '';
-$pageOffset = is_numeric($_POST["page"]) ? Escape::number($_POST["page"]) * 10 : 0;
+$pageOffset = is_numeric($_POST["page"]) ? abs(Escape::number($_POST["page"])) * 10 : 0;
 
 switch($type) {
 	case 0: // Search

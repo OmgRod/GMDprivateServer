@@ -12,7 +12,7 @@ if(!$person["success"]) exit(CommonError::InvalidRequest);
 $stars = $demons = $coins = $userCoins = $moons = $diamonds = $creatorPoints = 0;
 $leaderboardsString = "";
 $type = Escape::latin($_POST["type"]);
-$count = $_POST["count"] ? Escape::number($_POST["count"]) : 50;
+$count = $_POST["count"] ? abs(Escape::number($_POST["count"])) : 50;
 
 $leaderboard = Library::getLeaderboard($person, $type, $count);
 $rank = $leaderboard['rank'];

@@ -13,6 +13,9 @@ $personAppearance = Library::getPersonCommentAppearance($person);
 $accountClan = Library::getAccountClan($accountID);
 
 $dataArray = [
+	'SETTING_LANGUAGE_EN_DEFAULT' => $_COOKIE['lang'] == 'EN' ? 'true' : 'false',
+	'SETTING_LANGUAGE_RU_DEFAULT' => $_COOKIE['lang'] == 'RU' ? 'true' : 'false',
+	
 	'ACCOUNT_COLOR' => "color: rgb(".str_replace(",", " ", $personAppearance['commentColor']).")",
 	'CLAN_NAME' => $accountClan ? $accountClan['clan'] : Dashboard::string('notInClan'),
 	'CLAN_COLOR' => $accountClan ? "color: #".$accountClan['color']."" : '',

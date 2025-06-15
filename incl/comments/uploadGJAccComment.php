@@ -10,7 +10,7 @@ $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 $accountID = $person['accountID'];
 
-$gameVersion = Escape::number($_POST['gameVersion']);
+$gameVersion = abs(Escape::number($_POST['gameVersion']));
 $comment = Escape::text($_POST['comment']);
 
 if(empty($comment)) exit(CommonError::InvalidRequest);

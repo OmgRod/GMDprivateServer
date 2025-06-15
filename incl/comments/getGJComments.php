@@ -12,11 +12,11 @@ if(!$person["success"]) exit(CommonError::InvalidRequest);
 $commentsString = $usersString = "";
 $usersArray = [];
 
-$binaryVersion = isset($_POST['binaryVersion']) ? Escape::number($_POST["binaryVersion"]) : 0;
-$gameVersion = isset($_POST['gameVersion']) ? Escape::number($_POST["gameVersion"]) : 0;
+$binaryVersion = isset($_POST['binaryVersion']) ? abs(Escape::number($_POST["binaryVersion"])) : 0;
+$gameVersion = isset($_POST['gameVersion']) ? abs(Escape::number($_POST["gameVersion"])) : 0;
 $sortMode = $_POST["mode"] ? "comments.likes - comments.dislikes" : "comments.timestamp";
-$count = isset($_POST["count"]) ? Escape::number($_POST["count"]) : 10;
-$page = isset($_POST["page"]) ? Escape::number($_POST["page"]) : 0;
+$count = isset($_POST["count"]) ? abs(Escape::number($_POST["count"])) : 10;
+$page = isset($_POST["page"]) ? abs(Escape::number($_POST["page"])) : 0;
 
 $pageOffset = $page * $count;
 
@@ -24,7 +24,7 @@ switch(true) {
 	case isset($_POST['levelID']):
 		$displayLevelID = false;
 		
-		$levelID = Escape::multiple_ids($_POST['levelID']);
+		$levelID = Escape::number($_POST['levelID']);
 		
 		if($levelID > 0) {
 			$level = Library::getLevelByID($levelID);

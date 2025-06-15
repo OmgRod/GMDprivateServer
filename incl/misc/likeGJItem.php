@@ -9,7 +9,7 @@ $sec = new Security();
 $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
-$itemID = Escape::multiple_ids($_POST['itemID']) ?: Escape::number($_POST['levelID']);
+$itemID = Escape::number($_POST['itemID']) ?: abs(Escape::number($_POST['levelID']) ?: 0);
 $type = Escape::number($_POST['type']) ?: 1;
 $isLike = Escape::number($_POST['like']);
 

@@ -1,4 +1,4 @@
-<div class="contentDiv">
+<div class="contentDiv" dashboard-context-div>
 	<div class="horisontal">
 		<div class="vertical">
 			<div class="levelTitle">
@@ -42,8 +42,13 @@
 				%LEVEL_LENGTH%
 			</text>
 			
-			<text class="levelStat" title="%TEXT_stars%">
+			<text class="levelStat" title="%TEXT_stars%" dashboard-hide="%LEVEL_IS_PLATFORMER%">
 				<i class="fa-solid fa-star"></i>
+				%starStars%
+			</text>
+			
+			<text class="levelStat" title="%TEXT_moons%" dashboard-show="%LEVEL_IS_PLATFORMER%">
+				<i class="fa-solid fa-moon"></i>
 				%starStars%
 			</text>
 			
@@ -52,13 +57,47 @@
 				%downloads%
 			</text>
 			
-			<text class="levelStat" title="%TEXT_likes%">
+			<text class="levelStat" title="%TEXT_rating%">
 				<i dashboard-hide="%LEVEL_IS_DISLIKED%" class="fa-solid fa-thumbs-up"></i>
 				<i dashboard-show="%LEVEL_IS_DISLIKED%" class="fa-solid fa-thumbs-down"></i>
 				%LEVEL_LIKES%
 			</text>
 			
-			<button class="button" type="button" onclick="%LEVEL_BUTTON_ONCLICK%">%TEXT_viewLevel%</button>
+			<button class="button titleToRight" type="button" title="%TEXT_viewLevel%" href="browse/levels/%levelID%">
+				<i class="fa-solid fa-eye"></i>
+			</button>
 		</div>
+	</div>
+	
+	<div class="contextMenuDiv" dashboard-context-menu>
+		<button class="contextMenuButton" title="%TEXT_viewLevel%" type="button" href="browse/levels/%levelID%">
+			<i class="fa-solid fa-eye"></i>
+			<text>%TEXT_viewLevel%</text>
+		</button>
+		
+		<button class="contextMenuButton" title="%TEXT_viewComments%" type="button" href="browse/levels/%levelID%/comments">
+			<i class="fa-solid fa-comment"></i>
+			<text>%TEXT_viewComments%</text>
+		</button>
+		
+		<button class="contextMenuButton" title="%TEXT_viewLeaderboards%" type="button" href="browse/levels/%levelID%/scores">
+			<i class="fa-solid fa-chart-simple"></i>
+			<text>%TEXT_viewLeaderboards%</text>
+		</button>
+		
+		<button class="contextMenuButton" title="%TEXT_viewSongs%" type="button" href="browse/levels/%levelID%/songs">
+			<i class="fa-solid fa-music"></i>
+			<text>%TEXT_viewSongs%</text>
+		</button>
+		
+		<button class="contextMenuButton" title="%TEXT_viewSFXs%" type="button" href="browse/levels/%levelID%/sfxs">
+			<i class="fa-solid fa-drum"></i>
+			<text>%TEXT_viewSFXs%</text>
+		</button>
+		
+		<button class="contextMenuButton" title="%TEXT_manageLevel%" type="button" href="browse/levels/%levelID%/manage" dashboard-show="%LEVEL_CAN_MANAGE%">
+			<i class="fa-solid fa-pencil"></i>
+			<text>%TEXT_manageLevel%</text>
+		</button>
 	</div>
 </div>

@@ -10,7 +10,7 @@ $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 $songsString = '';
-$page = Escape::number($_POST['page']);
+$page = abs(Escape::number($_POST['page']));
 $pageOffset = $page * 20;
 
 if($topArtistsFromGD) {

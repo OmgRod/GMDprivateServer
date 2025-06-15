@@ -11,7 +11,7 @@ $userID = $person['userID'];
 
 $order = "uploadDate";
 $orderSorting = "DESC";
-$pageOffset = is_numeric($_GET["page"]) ? (Escape::number($_GET["page"]) - 1) * 10 : 0;
+$pageOffset = is_numeric($_GET["page"]) ? abs(Escape::number($_GET["page"]) - 1) * 10 : 0;
 $page = '';
 
 $getFilters = Library::getLevelSearchFilters($_GET, 22, true, true);

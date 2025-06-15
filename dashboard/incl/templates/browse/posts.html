@@ -5,7 +5,7 @@
 	</div>
 	
 	<div class="pageDiv">
-		<p>%COMMENT_PAGE_TEXT%</p>
+		<p>%POST_PAGE_TEXT%</p>
 		<div class="pageButtons">
 			<button dashboard-disable="%IS_FIRST_PAGE%" class="pageButton" type="button" onclick="%FIRST_PAGE_BUTTON%">
 				<i class="fa-solid fa-backward"></i>
@@ -26,16 +26,15 @@
 	</div>
 </div>
 
-<div class="nothingOnPageDiv" dashboard-show="%LEVEL_NO_COMMENTS%">
+<div class="nothingOnPageDiv" dashboard-show="%PROFILE_NO_POSTS%">
 	<i class="fa-solid fa-comment-slash nothing-icon"></i>
-	<h1>%TEXT_noComments%</h1>
+	<h1>%TEXT_noPosts%</h1>
 </div>
 
 %ADDITIONAL_PAGE%
 
-<form class="inlineForm" name="uploadCommentForm" autocomplete="off" dashboard-show="%COMMENT_CAN_POST%">
+<form class="inlineForm" name="uploadPostForm" autocomplete="off" dashboard-show="%PROFILE_CAN_POST%">
 	<input class="inputStyle bordered" type="text" name="comment" placeholder="%TEXT_writeSomething%" />
-	<input type="hidden" name="levelID" value="%LEVEL_ID%" />
 	
-	<button class="button bordered" type="button" onclick="postPage('manage/uploadComment', 'uploadCommentForm')"><i class="fa-solid fa-paper-plane"></i></button>
+	<button class="button bordered" type="button" onclick="postPage('manage/uploadPost', 'uploadPostForm')"><i class="fa-solid fa-paper-plane"></i></button>
 </form>

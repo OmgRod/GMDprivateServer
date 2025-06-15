@@ -61,7 +61,7 @@ if($_GET['id']) {
 	$level['LEVEL_SFXS'] = count($sfxIDs);
 	
 	$level['LEVEL_SONG_IDS'] = implode(',', $songIDs);
-	$level['LEVEL_SFX_IDS'] = $level['sfxIDs'];
+	$level['LEVEL_SFX_IDS'] = implode(',', $sfxIDs);
 	
 	$level['LEVEL_HAS_REQUESTED_STARS'] = $level['requestedStars'] ? 'true' : 'false';
 	
@@ -84,12 +84,11 @@ if($_GET['id']) {
 		$pageBase = '../../../';
 		$level['LEVEL_IS_NOTHING_OPENED'] = 'false';
 		
-		$pageOffset = is_numeric($_GET["page"]) ? (Escape::number($_GET["page"]) - 1) * 10 : 0;
+		$pageOffset = is_numeric($_GET["page"]) ? abs(Escape::number($_GET["page"]) - 1) * 10 : 0;
 		
 		switch($parameters[1]) {
 			case 'comments':
-				$mode = isset($_GET['mode']) ? Escape::number($_GET["mode"]) : 1;
-			
+				$mode = isset($_GET['mode']) ? Escape::number($_GET["mode"]) : 0;
 				$sortMode = $mode ? "comments.likes - comments.dislikes" : "comments.timestamp";
 				
 				$comments = Library::getCommentsOfLevel($levelID, $sortMode, $pageOffset);
@@ -107,6 +106,8 @@ if($_GET['id']) {
 					'COMMENT_PAGE_TEXT' => sprintf(Dashboard::string('pageText'), $pageNumber, $pageCount),
 					'LEVEL_ID' => $levelID,
 					
+					'COMMENT_CAN_POST' => 'true',
+					
 					'IS_FIRST_PAGE' => $pageNumber == 1 ? 'true' : 'false',
 					'IS_LAST_PAGE' => $pageNumber == $pageCount ? 'true' : 'false',
 					
@@ -123,36 +124,38 @@ if($_GET['id']) {
 			case 'scores':
 				$levelIsPlatformer = $level['levelLength'] == 5;
 			
-				$type = Escape::number($_GET['type']) ?: 0;
+				$type = abs(Escape::number($_GET['type']) ?: 0);
 				$mode = $_GET['mode'] == 1 ? 'points' : 'time';
 				$dailyID = $_GET['isDaily'] ? 1 : 0;
 				
-				$scores = $levelIsPlatformer ? Library::getPlatformerLevelScores($levelID, $person, $type, $dailyID, $mode) : Library::getLevelScores($levelID, $person, $type, $dailyID);
+				$scores = $levelIsPlatformer ? Library::getPlatformerLevelScores($levelID, $person, $type, $dailyID, $mode, $pageOffset) : Library::getLevelScores($levelID, $person, $type, $dailyID, $pageOffset);
 				
-				$pageNumber = $pageOffset * -1;
+				$pageNumber = ceil($pageOffset / 10) + 1 ?: 1;
+				$pageCount = floor(($scores['count'] - 1) / 10) + 1;
+				
+				if($pageCount == 0) $pageCount = 1;
+				
 				$scoreNumber = $pageOffset;
-				foreach($scores AS &$score) {
-					$pageNumber++;
-					if($pageNumber < 1) continue;
-					
+				foreach($scores['scores'] AS &$score) {
 					$scoreNumber++;
-					if($scoreNumber > $pageOffset + 10) break;
 					
 					$score['SCORE_NUMBER'] = $scoreNumber;
 					$additionalPage .= Dashboard::renderScoreCard($score, $person, $levelIsPlatformer);
 				}
 				
 				$pageNumber = ceil($pageOffset / 10) + 1 ?: 1;
-				$pageCount = floor((count($scores) - 1) / 10) + 1;
+				$pageCount = floor(($scores['count'] - 1) / 10) + 1;
 				
 				if($pageCount == 0) $pageCount = 1;
 				
 				$additionalData = [
 					'ADDITIONAL_PAGE' => $additionalPage,
-					'LEVEL_NO_SCORES' => !count($scores) ? 'true' : 'false',
-					'LEVEL_IS_PLATFORMER' => $levelIsPlatformer ? 'true' : 'false',
-					'LEVEL_IS_DAILY' => $dailyID ? 'true' : 'false',
+					'SCORE_NO_SCORES' => !$scores['count'] ? 'true' : 'false',
+					'SCORE_IS_PLATFORMER' => $levelIsPlatformer ? 'true' : 'false',
+					'SCORE_IS_DAILY' => $dailyID ? 'true' : 'false',
 					'COMMENT_PAGE_TEXT' => sprintf(Dashboard::string('pageText'), $pageNumber, $pageCount),
+					
+					'SCORE_ENABLE_FILTERS' => 'true',
 					
 					'IS_FIRST_PAGE' => $pageNumber == 1 ? 'true' : 'false',
 					'IS_LAST_PAGE' => $pageNumber == $pageCount ? 'true' : 'false',
@@ -162,8 +165,6 @@ if($_GET['id']) {
 					'NEXT_PAGE_BUTTON' => "getPage('@page=".($pageNumber + 1)."')",
 					'LAST_PAGE_BUTTON' => "getPage('@page=".$pageCount."')"
 				];
-				
-				if(!$additionalPage) $additionalData['LEVEL_NO_SCORES'] = 'true';
 				
 				$level['LEVEL_ADDITIONAL_PAGE'] = Dashboard::renderTemplate('browse/scores', $additionalData);
 				break;
@@ -223,7 +224,49 @@ if($_GET['id']) {
 				$level['LEVEL_ADDITIONAL_PAGE'] = Dashboard::renderTemplate("browse/songs", $additionalData);
 				break;
 			case 'sfxs':
-				$level['LEVEL_ADDITIONAL_PAGE'] = Dashboard::renderTemplate('browse/manage', $additionalData);
+				if(empty($sfxIDs)) {
+					$pageNumber = $pageCount = 1;
+				
+					$additionalData = [
+						'ADDITIONAL_PAGE' => '',
+						'SFX_PAGE_TEXT' => sprintf(Dashboard::string('pageText'), $pageNumber, $pageCount),
+						'SFX_NO_SFXS' => 'true',
+						
+						'IS_FIRST_PAGE' => $pageNumber == 1 ? 'true' : 'false',
+						'IS_LAST_PAGE' => $pageNumber == $pageCount ? 'true' : 'false',
+						
+						'FIRST_PAGE_BUTTON' => "getPage('@page=REMOVE_QUERY')",
+						'PREVIOUS_PAGE_BUTTON' => "getPage('@".(($pageNumber - 1) > 1 ? "page=".($pageNumber - 1) : 'page=REMOVE_QUERY')."')",
+						'NEXT_PAGE_BUTTON' => "getPage('@page=".($pageNumber + 1)."')",
+						'LAST_PAGE_BUTTON' => "getPage('@page=".$pageCount."')"
+					];
+					
+					$level['LEVEL_ADDITIONAL_PAGE'] = Dashboard::renderTemplate("browse/sfxs", $additionalData);
+					break;
+				}
+
+				$sfxs = Library::getSFXsByLibraryIDs($sfxIDs, $pageOffset, 10);
+
+				foreach($sfxs['sfxs'] AS &$sfx) $additionalPage .= Dashboard::renderSFXCard($sfx, $person);
+
+				$pageNumber = ceil($pageOffset / 10) + 1 ?: 1;
+				$pageCount = floor($sfxs['count'] / 10) + 1;
+
+				$additionalData = [
+					'ADDITIONAL_PAGE' => $additionalPage,
+					'SFX_PAGE_TEXT' => sprintf(Dashboard::string('pageText'), $pageNumber, $pageCount),
+					'SFX_NO_SFXS' => empty($additionalPage) ? 'true' : 'false',
+					
+					'IS_FIRST_PAGE' => $pageNumber == 1 ? 'true' : 'false',
+					'IS_LAST_PAGE' => $pageNumber == $pageCount ? 'true' : 'false',
+					
+					'FIRST_PAGE_BUTTON' => "getPage('@page=REMOVE_QUERY')",
+					'PREVIOUS_PAGE_BUTTON' => "getPage('@".(($pageNumber - 1) > 1 ? "page=".($pageNumber - 1) : 'page=REMOVE_QUERY')."')",
+					'NEXT_PAGE_BUTTON' => "getPage('@page=".($pageNumber + 1)."')",
+					'LAST_PAGE_BUTTON' => "getPage('@page=".$pageCount."')"
+				];
+				
+				$level['LEVEL_ADDITIONAL_PAGE'] = Dashboard::renderTemplate("browse/sfxs", $additionalData);
 				break;
 			case 'manage':
 				if(!Library::checkPermission($person, "dashboardManageLevels")) exit(Dashboard::renderErrorPage(Dashboard::string("levelsTitle"), Dashboard::string("errorNoPermission"), '../../../'));
@@ -240,7 +283,7 @@ if($_GET['id']) {
 // Search levels
 $order = "uploadDate";
 $orderSorting = "DESC";
-$pageOffset = is_numeric($_GET["page"]) ? (Escape::number($_GET["page"]) - 1) * 10 : 0;
+$pageOffset = is_numeric($_GET["page"]) ? abs(Escape::number($_GET["page"]) - 1) * 10 : 0;
 $page = '';
 
 $getFilters = Library::getLevelSearchFilters($_GET, 22, true, false);

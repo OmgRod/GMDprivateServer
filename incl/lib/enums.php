@@ -67,7 +67,7 @@ class CommentsError {
 	const NothingFound = "-2";
 }
 
-class Action { // Last action ID is 57
+class Action { // Last action ID is 58
 	const AccountRegister = 1;
 	const UserCreate = 51;
 	
@@ -141,6 +141,7 @@ class Action { // Last action ID is 57
 	const AccountRegisterRateLimit = 54;
 	const UserCreateRateLimit = 55;
 	const FilterRateLimit = 56;
+	const AccountBackupRateLimit = 58;
 	
 	// Unused
 	const GJPSessionGrant = 16;

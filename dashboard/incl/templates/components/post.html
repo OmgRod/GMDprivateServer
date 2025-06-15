@@ -2,20 +2,19 @@
 	<div class="vertical">
 		<div class="levelTitle">
 			<div class="horisontal">
-				<h2>%COMMENT_USER%</h2>
-				<h3 dashboard-show="%COMMENT_SHOW_PERCENT%">%percent%%</h3>
+				<h2>%POST_USER%</h2>
 			</div>
 			
 			<div class="commentStat">
 				<button class="button squareButton"
-					dashboard-show="%COMMENT_CAN_DELETE%"
-					onclick="postPage('manage/deleteComment', 'comment%commentID%')"
+					dashboard-show="%POST_CAN_DELETE%"
+					onclick="postPage('manage/deletePost', 'post%commentID%')"
 					title="%TEXT_deleteComment%"
 				>
 					<i class="fa-solid fa-xmark"></i>
 				</button>
-				<form name="comment%commentID%">
-					<input type="hidden" name="commentID" value="%commentID%"></input>
+				<form name="post%commentID%">
+					<input type="hidden" name="postID" value="%commentID%"></input>
 				</form>
 				
 				<text title="%TEXT_likes%">
@@ -28,7 +27,7 @@
 			</div>
 		</div>
 		
-		<p class="levelDescription">%COMMENT_CONTENT%</p>
+		<p class="levelDescription">%POST_CONTENT%</p>
 		
 		<div class="stats small">
 			<div class="commentStat" title="ID">
@@ -36,15 +35,9 @@
 				<text dashboard-copy>%commentID%</text>
 			</div>
 			
-			<div class="horisontal">
-				<div class="commentStat" dashboard-show="%COMMENT_SHOW_LEVEL%">
-					%COMMENT_LEVEL_TEXT%
-				</div>
-
-				<div class="commentStat" title="%TEXT_uploadDate%">
-					<i class="fa-solid fa-calendar"></i>
-					<text dashboard-date="%timestamp%"></text>
-				</div>
+			<div class="commentStat" title="%TEXT_uploadDate%">
+				<i class="fa-solid fa-calendar"></i>
+				<text dashboard-date="%timestamp%"></text>
 			</div>
 		</div>
 	</div>

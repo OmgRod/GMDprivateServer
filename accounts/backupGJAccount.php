@@ -1,4 +1,5 @@
 <?php
+require __DIR__."/../../config/security.php";
 require_once __DIR__."/../incl/lib/mainLib.php";
 require_once __DIR__."/../incl/lib/security.php";
 require_once __DIR__."/../incl/lib/exploitPatch.php";
@@ -10,11 +11,26 @@ if(empty($saveData)) exit(BackupError::SomethingWentWrong);
 
 $person = $sec->loginPlayer();
 if(!$person["success"]) {
-	Library::logAction($person, Action::FailedAccountBackup, strlen($saveData));
+	$logPerson = [
+		'accountID' => "0",
+		'userID' => "0",
+		'userName' => '',
+		'IP' => $person['IP']
+	];
+	
+	Library::logAction($logPerson, Action::FailedAccountBackup, strlen($saveData), 1);
 	exit(CommonError::InvalidRequest);
 }
 $accountID = $person["accountID"];
 $userName = $person['userName'];
+
+$checkRateLimit = Library::checkRateLimits($person, $type);
+if(!$checkRateLimit) exit(CommonError::InvalidRequest);
+
+if(strlen($saveData) > $maxBackupFileSize) {
+	Library::logAction($person, Action::FailedAccountBackup, strlen($saveData), 2);
+	exit(BackupError::TooLarge);
+}
 
 $account = Library::getAccountByID($accountID);
 
@@ -23,7 +39,7 @@ $saveDataDecoded = mb_ereg_replace('(\r\n|\r|\n|( \t)|\t)', '', Security::decode
 
 $isSaveDataValid = simplexml_load_string($saveDataDecoded);
 if(!$isSaveDataValid) {
-	Library::logAction($person, Action::FailedAccountBackup, strlen($saveData));
+	Library::logAction($person, Action::FailedAccountBackup, strlen($saveData), 3);
 	exit(CommonError::InvalidRequest);
 }
 
@@ -47,7 +63,7 @@ $levelsDataDecoded = Security::decodeSaveFile($saveDataArray[1]);
 
 $isLevelsDataValid = simplexml_load_string($levelsDataDecoded);
 if(!$isLevelsDataValid) {
-	Library::logAction($person, Action::FailedAccountBackup, strlen($saveData));
+	Library::logAction($person, Action::FailedAccountBackup, strlen($saveData), 4);
 	exit(CommonError::InvalidRequest);
 }
 

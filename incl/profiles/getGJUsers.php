@@ -10,7 +10,7 @@ if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 $usersString = '';
 $str = Escape::text($_POST["str"]);
-$page = Escape::number($_POST["page"]);
+$page = abs(Escape::number($_POST["page"]));
 $pageOffset = $page * 10;
 
 $users = Library::getUsers($str, $pageOffset);

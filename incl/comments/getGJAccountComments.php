@@ -13,7 +13,7 @@ $targetAccountID = Escape::latin_no_spaces($_POST['accountID']);
 $targetUserID = Library::getUserID($targetAccountID);
 if(!$targetUserID) exit(CommonError::InvalidRequest);
 
-$page = Escape::number($_POST["page"]) ?: 0;
+$page = abs(Escape::number($_POST["page"]) ?: 0);
 $commentsPage = $page * 10;
 
 $isBlocked = Library::isPersonBlocked($accountID, $targetAccountID);

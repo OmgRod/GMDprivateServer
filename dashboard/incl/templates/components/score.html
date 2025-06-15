@@ -13,7 +13,7 @@
 				<button dashboard-show="%SCORE_CAN_DELETE%" class="button squareButton" onclick="postPage('manage/deleteScore', 'score%scoreID%')"><i class="fa-solid fa-xmark"></i></button>
 				<form name="score%scoreID%">
 					<input type="hidden" name="scoreID" value="%scoreID%"></input>
-					<input dashboard-show="%LEVEL_IS_PLATFORMER%" type="hidden" name="isPlatformer" value="1"></input>
+					<input dashboard-show="%SCORE_IS_PLATFORMER%" type="hidden" name="isPlatformer" value="1"></input>
 				</form>
 			</div>
 		</div>
@@ -25,7 +25,7 @@
 					<text dashboard-copy>%scoreID%</text>
 				</div>
 				
-				<div class="commentStat" title="%TEXT_percent%" dashboard-hide="%LEVEL_IS_PLATFORMER%">
+				<div class="commentStat" title="%TEXT_percent%" dashboard-hide="%SCORE_IS_PLATFORMER%">
 					<i class="fa-solid fa-percent"></i> %percent%
 				</div>
 				
@@ -41,23 +41,29 @@
 					<i class="fa-solid fa-computer-mouse"></i> %clicks%
 				</div>
 				
-				<div class="commentStat" title="%TEXT_time%" dashboard-show="%SCORE_CAN_SEE_HIDDEN%" dashboard-hide="%LEVEL_IS_PLATFORMER%">
+				<div class="commentStat" title="%TEXT_time%" dashboard-show="%SCORE_CAN_SEE_HIDDEN%" dashboard-hide="%SCORE_IS_PLATFORMER%">
 					<i class="fa-solid fa-clock"></i> %time%
 				</div>
 				
-				<div class="commentStat" title="%TEXT_time%" dashboard-show="%LEVEL_IS_PLATFORMER%">
+				<div class="commentStat" title="%TEXT_time%" dashboard-show="%SCORE_IS_PLATFORMER%">
 					<i class="fa-solid fa-clock"></i>
 					<text dashboard-time="%time%"></text>
 				</div>
 				
-				<div class="commentStat" title="%TEXT_points%" dashboard-show="%LEVEL_IS_PLATFORMER%">
+				<div class="commentStat" title="%TEXT_points%" dashboard-show="%SCORE_IS_PLATFORMER%">
 					<i class="fa-solid fa-circle-dot"></i> %points%
 				</div>
 			</div>
 			
-			<div class="commentStat" title="%TEXT_uploadDate%">
-				<i class="fa-solid fa-calendar"></i>
-				<text dashboard-date="%timestamp%"></text>
+			<div class="horisontal small">
+				<div class="commentStat" dashboard-show="%SCORE_SHOW_LEVEL%">
+					%SCORE_LEVEL_TEXT%
+				</div>
+				
+				<div class="commentStat" title="%TEXT_uploadDate%">
+					<i class="fa-solid fa-calendar"></i>
+					<text dashboard-date="%timestamp%"></text>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -24,7 +24,7 @@ class Commands {
 					$increaseSplit++;
 					$difficulty .= " ".Escape::latin($commentSplit[1 + $increaseSplit]);
 				}
-				$stars = Escape::number($commentSplit[2 + $increaseSplit]);
+				$stars = abs(Escape::number($commentSplit[2 + $increaseSplit]));
 				$verifyCoins = Security::limitValue(0, Escape::number($commentSplit[3 + $increaseSplit]), 1);
 				$featured = Security::limitValue(0, Escape::number($commentSplit[4 + $increaseSplit]), 4);
 				
@@ -158,7 +158,7 @@ class Commands {
 						."!event ".Library::textColor("*duration in minutes*", Color::Orange)." ".Library::textColor("*reward type*", Color::Orange)." ".Library::textColor("*reward amount*", Color::Orange).PHP_EOL
 						."Example: ".Library::textColor("!event 60 7 1000 8 20 1001 379", Color::LightYellow);
 				}
-				$duration = Escape::number($commentSplit[1]) * 60;
+				$duration = abs(Escape::number($commentSplit[1])) * 60;
 				unset($commentSplit[0], $commentSplit[1]);
 				$rewards = implode(",", $commentSplit);
 				
@@ -191,8 +191,8 @@ class Commands {
 					$increaseSplit++;
 					$difficulty .= " ".Escape::latin($commentSplit[1 + $increaseSplit]);
 				}
-				$stars = Escape::number($commentSplit[2 + $increaseSplit]);
-				$featured = Escape::number($commentSplit[3 + $increaseSplit]);
+				$stars = abs(Escape::number($commentSplit[2 + $increaseSplit]));
+				$featured = abs(Escape::number($commentSplit[3 + $increaseSplit]));
 				
 				if(!$difficulty || !$stars || !is_numeric($featured)) {
 					return Library::textColor("Incorrect usage!", Color::Red).PHP_EOL
@@ -287,7 +287,7 @@ class Commands {
 						."Maximum password length is ".Library::textColor("6 characters", Color::Green);
 				}
 				
-				$newPassword = sprintf("%06d", Escape::number($commentSplit[1]));
+				$newPassword = sprintf("%06d", abs(Escape::number($commentSplit[1])));
 				
 				if($level['password'] == '1'.$newPassword || $level['password'].'000000' == '1'.$newPassword) return Library::textColor($level['levelName'], Color::SkyBlue)." ".Library::textColor("already has", Color::Green)." this password!";
 				
@@ -298,7 +298,7 @@ class Commands {
 			case "!s":
 				if(!Library::checkPermission($person, 'commandSong') && $person['userID'] != $level['userID']) return "You ".Library::textColor("don't have permissions", Color::Red)." to use command ".Library::textColor($command, Color::SkyBlue)."!";
 			
-				$songID = Escape::number($commentSplit[1]);
+				$songID = abs(Escape::number($commentSplit[1]));
 				if(!$songID) {
 					return Library::textColor("Incorrect usage!", Color::Red).PHP_EOL
 						."!song ".Library::textColor("*song ID*", Color::Orange).PHP_EOL
@@ -426,14 +426,14 @@ class Commands {
 			case '!r':
 				if(!Library::checkPermission($person, 'commandRate')) return "You ".Library::textColor("don't have permissions", Color::Red)." to use command ".Library::textColor($command, Color::SkyBlue)."!";
 
-				$reward = Escape::number($commentSplit[1]);
+				$reward = abs(Escape::number($commentSplit[1]));
 				$difficulty = Escape::latin($commentSplit[2]);
 				if(!is_numeric($commentSplit[3])) {
 					$increaseSplit++;
 					$difficulty .= " ".Escape::latin($commentSplit[2 + $increaseSplit]);
 				}
 				$featured = Security::limitValue(0, Escape::number($commentSplit[3 + $increaseSplit]), 1);
-				$levelsCount = Escape::number($commentSplit[4 + $increaseSplit]);
+				$levelsCount = abs(Escape::number($commentSplit[4 + $increaseSplit]));
 				
 				if(empty($levelsCount)) $levelsCount = count(explode(',', $list['listlevels']));
 				
@@ -595,14 +595,14 @@ class Commands {
 			case '!sug':
 				if(!Library::checkPermission($person, 'commandSuggest')) return "You ".Library::textColor("don't have permissions", Color::Red)." to use command ".Library::textColor($command, Color::SkyBlue)."!";
 			
-				$reward = Escape::number($commentSplit[1]);
+				$reward = abs(Escape::number($commentSplit[1]));
 				$difficulty = Escape::latin($commentSplit[2]);
 				if(!is_numeric($commentSplit[3])) {
 					$increaseSplit++;
 					$difficulty .= " ".Escape::latin($commentSplit[2 + $increaseSplit]);
 				}
-				$featured = Escape::number($commentSplit[3 + $increaseSplit]);
-				$levelsCount = Escape::number($commentSplit[4 + $increaseSplit]);
+				$featured = abs(Escape::number($commentSplit[3 + $increaseSplit]));
+				$levelsCount = abs(Escape::number($commentSplit[4 + $increaseSplit]));
 				
 				if(empty($levelsCount)) $levelsCount = count(explode(',', $list['listlevels']));
 				
@@ -645,7 +645,7 @@ class Commands {
 		switch($subCommand) {
 			case 'link':
 			case 'l':
-				$discordID = Escape::number($commentSplit[2]);
+				$discordID = abs(Escape::number($commentSplit[2]));
 				if(!$discordID) {
 					return Library::textColor("Incorrect usage!", Color::Red).PHP_EOL
 						."!discord link ".Library::textColor("*Discord account ID*", Color::Orange).PHP_EOL
@@ -666,8 +666,8 @@ class Commands {
 			case 'verify':
 			case 'a':
 			case 'v':
-				$code = Escape::number($commentSplit[2]);
-				if(!$code) {
+				$code = abs(Escape::number($commentSplit[2]));
+				if(!$code || strlen($code) != 4) {
 					return Library::textColor("Incorrect usage!", Color::Red).PHP_EOL
 						."!discord verify ".Library::textColor("*Verification code*", Color::Orange).PHP_EOL
 						."Example: ".Library::textColor("!discord verify 7024", Color::LightYellow);

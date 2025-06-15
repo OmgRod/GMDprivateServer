@@ -18,7 +18,7 @@ if($person['success']) {
 $order = "reuploadTime";
 $orderSorting = "DESC";
 $filters = ["songs.reuploadID > 0"];
-$pageOffset = is_numeric($_GET["page"]) ? (Escape::number($_GET["page"]) - 1) * 10 : 0;
+$pageOffset = is_numeric($_GET["page"]) ? abs(Escape::number($_GET["page"]) - 1) * 10 : 0;
 $page = '';
 
 $songs = Library::getSongs($filters, $order, $orderSorting, '', $pageOffset, 10);

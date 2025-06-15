@@ -8,9 +8,9 @@ $sec = new Security();
 $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
-$messagesState = Escape::number($_POST["mS"]);
-$friendRequestsState = Escape::number($_POST["frS"]);
-$commentsState = Escape::number($_POST["cS"]);
+$messagesState = Security::limitValue(0, Escape::number($_POST["mS"]), 2);
+$friendRequestsState = Security::limitValue(0, Escape::number($_POST["frS"]), 1);
+$commentsState = Security::limitValue(0, Escape::number($_POST["cS"]), 2);
 $socialsYouTube = Escape::text($_POST["yt"]);
 $socialsTwitter = Escape::text($_POST["twitter"]);
 $socialsTwitch = Escape::text($_POST["twitch"]);

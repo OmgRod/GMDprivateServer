@@ -82,10 +82,10 @@ $vpns['vpn'] = 'https://raw.githubusercontent.com/X4BNet/lists_vpn/main/output/v
 		0 — turned off
 	
 	$statsTimeCheck — time in seconds for checking stats speed
-	$maxStarsPossible — maximum amount of stars user can gain before they get banned
-	$maxMoonsPossible — maximum amount of moons user can gain before they get banned
-	$maxUserCoinsPossible — maximum amount of user coins user can gain before they get banned
-	$maxDemonsPossible — maximum amount of demons user can gain before they get banned
+	$maxStarsPossible — maximum amount of stars user can gain in time before they get banned
+	$maxMoonsPossible — maximum amount of moons user can gain in time before they get banned
+	$maxUserCoinsPossible — maximum amount of user coins user can gain in time before they get banned
+	$maxDemonsPossible — maximum amount of demons user can gain in time before they get banned
 
 	$enableACEExploitCheck — enable level ACE exploit check, can be useful for 2.1 GDPSs
 	$maxUncompressedLevelSize — maximum level size in bytes, that can be uploaded to server
@@ -125,6 +125,10 @@ $vpns['vpn'] = 'https://raw.githubusercontent.com/X4BNet/lists_vpn/main/output/v
 		0 — turned off
 	$usersCreateDelay — if last user was created X seconds ago, new one can't be created
 		0 — turned off
+	$backupAccountDelay — if last account backup was created X seconds ago, new one can't be done
+		0 — turned off
+	
+	$maxBackupFileSize — maximum size of backup, that can be uploaded to GDPS
 	
 	$filterTimeCheck — if person tried to post filtered word, warnings of how many seconds old should be checked
 	$filterRateLimitBan — how many filter warnings will get person banned from commenting
@@ -201,6 +205,9 @@ $globalLevelsUploadDelay = 2;
 $perUserLevelsUploadDelay = 5;
 $accountsRegisterDelay = 5;
 $usersCreateDelay = 10;
+$backupAccountDelay = 10;
+
+$maxBackupFileSize = 33554432;
 
 $filterTimeCheck = 60;
 $filterRateLimitBan = 10;

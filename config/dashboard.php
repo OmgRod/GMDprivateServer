@@ -6,6 +6,8 @@ $installed = true; // Like i said, it changed!
 	
 	$gdps — GDPS name, shows in title and various dashboard and Discord webhooks
 	
+	$accentColor — main color of your GDPS, will affect dashboard's accent color
+	
 	$lrEnabled — are level reupload tools enabled or not
 		True — level reupload tools are enabled
 		False — level reupload tools are disabled
@@ -49,6 +51,8 @@ $installed = true; // Like i said, it changed!
 		%1$s [%2$s] -> USERNAME [TAG], for example: Sa1ntSosetHui [GCS]
 */
 $gdps = "GDPS";
+
+$accentColor = "#93D7FF";
 
 $lrEnabled = true;
 $msgEnabled = true;

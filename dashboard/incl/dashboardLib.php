@@ -112,14 +112,14 @@ class Dashboard {
 		$iconKit = [
 			'main' => $iconsRendererServer.'/icon.png?type='.$iconTypes[$user['iconType']].'&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
 			'cube' => $iconsRendererServer.'/icon.png?type=cube&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'ship' => $iconsRendererServer.'/icon.png?type=ship&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'ball' => $iconsRendererServer.'/icon.png?type=ball&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'ufo' => $iconsRendererServer.'/icon.png?type=ufo&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'wave' => $iconsRendererServer.'/icon.png?type=wave&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'robot' => $iconsRendererServer.'/icon.png?type=robot&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'spider' => $iconsRendererServer.'/icon.png?type=spider&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'swing' => $iconsRendererServer.'/icon.png?type=swing&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
-			'jetpack' => $iconsRendererServer.'/icon.png?type=jetpack&value='.($user['accIcon'] ? $user['accIcon'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : '')
+			'ship' => $iconsRendererServer.'/icon.png?type=ship&value='.($user['accShip'] ? $user['accShip'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'ball' => $iconsRendererServer.'/icon.png?type=ball&value='.($user['accBall'] ? $user['accBall'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'ufo' => $iconsRendererServer.'/icon.png?type=ufo&value='.($user['accBird'] ? $user['accBird'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'wave' => $iconsRendererServer.'/icon.png?type=wave&value='.($user['accDart'] ? $user['accDart'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'robot' => $iconsRendererServer.'/icon.png?type=robot&value='.($user['accRobot'] ? $user['accRobot'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'spider' => $iconsRendererServer.'/icon.png?type=spider&value='.($user['accSpider'] ? $user['accSpider'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'swing' => $iconsRendererServer.'/icon.png?type=swing&value='.($user['accSwing'] ? $user['accSwing'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : ''),
+			'jetpack' => $iconsRendererServer.'/icon.png?type=jetpack&value='.($user['accJetpack'] ? $user['accJetpack'] : 1).'&color1='.$user['color1'].'&color2='.$user['color2'].($user['accGlow'] ? '&glow='.$user['accGlow'].'&color3='.$user['color3'] : '')
 		];
 		
 		$GLOBALS['core_cache']['dashboard']['iconKit'][$userID] = $iconKit;
@@ -133,7 +133,7 @@ class Dashboard {
 		require_once __DIR__."/../".$dbPath."incl/lib/exploitPatch.php";
 
 		$parseBody = explode(' ', $body);
-		$players = $levels = [];
+		$players = $levels = $lists = [];
 
 		foreach($parseBody AS &$element) {
 			$firstChar = mb_substr($element, 0, 1);
@@ -158,7 +158,8 @@ class Dashboard {
 
 					$level = Escape::number($element);
 					
-					$levels[] = $level;
+					if($level >= 0) $levels[] = $level;
+					else $lists[] = $level * -1;
 					
 					$body = str_replace([' #'.$level, ' #'.$level.' ', '#'.$level.' '], ['&nbsp;#'.$level, '&nbsp;#'.$level.'&nbsp;', '#'.$level.'&nbsp;'], $body);
 
@@ -203,12 +204,41 @@ class Dashboard {
 			}
 		}
 		
+		if(!empty($lists)) {
+			Library::cacheListsByID($lists);
+			
+			foreach($lists AS &$listID) {
+				$list = Library::getListByID($listID);
+				if(!$list) continue;
+				
+				$canSeeList = Library::canAccountSeeList($person, $list);
+				if(!$canSeeList) continue;
+				
+				$listString = self::getListString($listID, $list['listName']);
+				
+				$body = str_replace('#-'.$listID, $listString, $body);
+			}
+		}
+		
 		return $body;
 	}
 	
 	public static function getUserMetadata($user) {
 		global $dbPath;
-		require_once __DIR__."/../".$dbPath."incl/lib/mainLib.php";
+		require __DIR__."/../".$dbPath."config/dashboard.php";
+		require_once __DIR__."/../".$dbPath."incl/lib/mainLib.php";		
+		
+		if(!$user) {
+			return [
+				'mainIcon' => $iconsRendererServer."/icon.png?type=cube&value=1&color1=0&color2=3",
+				'userAppearance' => [
+					'commentsExtraText' => '',
+					'modBadgeLevel' => 0,
+					'commentColor' => '255,255,255'
+				],
+				'userAttributes' => ''
+			];
+		}
 		
 		$userAttributes = [];
 		
@@ -308,8 +338,11 @@ class Dashboard {
 			'PAGE_TITLE' => $pageTitle,
 			'GDPS_NAME' => $gdps,
 			'PAGE_BASE' => $pageBase,
+			
 			'DASHBOARD_FAVICON' => $dashboardFavicon,
+			'DASHBOARD_ACCENT_COLOR' => $accentColor,
 			'DATABASE_PATH' => $dbPath,
+			
 			'STYLE_TIMESTAMP' => filemtime(__DIR__."/style.css"),
 			'SCRIPT_TIMESTAMP' => filemtime(__DIR__."/script.js"),
 			
@@ -379,10 +412,17 @@ class Dashboard {
 	}
 	
 	public static function getLevelString($levelID, $levelName) {
-		return sprintf('<text class="username" title="'.sprintf(self::string('levelProfile'), htmlspecialchars($levelName)).'" href="browse/levels/%2$s">
+		return sprintf('<text class="username" '.(!$levelID ? 'dashboard-remove="href title"' : '').' title="'.sprintf(self::string('levelProfile'), htmlspecialchars($levelName)).'" href="browse/levels/%2$s">
 			<text class="emptySymbol">:(</text><i class="fa-solid fa-gamepad"></i>
 			%1$s
 		</text>', htmlspecialchars($levelName), (int)$levelID);
+	}
+	
+	public static function getListString($listID, $listName) {
+		return sprintf('<text class="username" '.(!$listID ? 'dashboard-remove="href title"' : '').' title="'.sprintf(self::string('listProfile'), htmlspecialchars($listName)).'" href="browse/lists/%2$s">
+			<text class="emptySymbol">:(</text><i class="fa-solid fa-list"></i>
+			%1$s
+		</text>', htmlspecialchars($listName), (int)$listID);
 	}
 	
 	public static function renderLevelCard($level, $person) {
@@ -403,6 +443,8 @@ class Dashboard {
 		
 		$level['LEVEL_LENGTH'] = $levelLengths[$level['levelLength']];
 		$level['LEVEL_LIKES'] = abs($level['likes'] - $level['dislikes']);
+		
+		$level['LEVEL_IS_PLATFORMER'] = $level['levelLength'] == 5 ? 'true' : 'false';
 		$level['LEVEL_IS_DISLIKED'] = $level['dislikes'] > $level['likes'] ? 'true' : 'false';
 		
 		if($song) $level['LEVEL_SONG'] = $song['authorName']." - ".$song['name'].(isset($song['ID']) ? " • <text dashboard-copy>".$song['ID'].'</text>' : '');
@@ -413,21 +455,28 @@ class Dashboard {
 		$level['LEVEL_SONG_URL'] = urlencode(urldecode($song['download'])) ?: '';
 		$level['LEVEL_IS_CUSTOM_SONG'] = isset($song['ID']) ? 'true' : 'false';
 		
-		$level['LEVEL_BUTTON_ONCLICK'] = 'getPage(\'browse/levels/'.$level['levelID'].'\')';
+		$level['LEVEL_CAN_MANAGE'] = ($person['userID'] == $level['userID'] || Library::checkPermission($person, "dashboardManageLevels")) ? 'true' : 'false';
 		
 		return self::renderTemplate('components/level', $level);
 	}
 	
-	public static function renderCommentCard($comment, $person) {
+	public static function renderCommentCard($comment, $person, $showLevel = false) {
 		global $dbPath;
 		require_once __DIR__."/../".$dbPath."incl/lib/mainLib.php";
 		
 		$user = Library::getUserByID($comment['userID']);
+		$userName = $user ? $user['userName'] : 'Undefined';
 		
 		$userMetadata = self::getUserMetadata($user);
 		
-		$comment['COMMENT_USER'] = self::getUsernameString($user['userName'], $userMetadata['mainIcon'], $userMetadata['userAppearance']['modBadgeLevel'], $userMetadata['userAttributes']);
+		if($showLevel) {
+			$comment['COMMENT_LEVEL_TEXT'] = $comment['itemID'] >= 0 ? self::getLevelString($comment['itemID'], $comment['itemName']) : self::getListString($comment['itemID'] * -1, $comment['itemName']);
+		}
+		$comment['COMMENT_SHOW_LEVEL'] = $showLevel ? 'true' : 'false';
+		
+		$comment['COMMENT_USER'] = self::getUsernameString($userName, $userMetadata['mainIcon'], $userMetadata['userAppearance']['modBadgeLevel'], $userMetadata['userAttributes']);
 		$comment['COMMENT_CONTENT'] = self::parseMentions($person, htmlspecialchars(Escape::url_base64_decode($comment['comment'])));
+		
 		
 		$comment['COMMENT_SHOW_PERCENT'] = $comment['percent'] > 0 ? 'true' : 'false';
 		
@@ -436,18 +485,42 @@ class Dashboard {
 		return self::renderTemplate('components/comment', $comment);
 	}
 	
-	public static function renderScoreCard($score, $person, $levelIsPlatformer) {
+	public static function renderPostCard($accountPost, $person) {
 		global $dbPath;
 		require_once __DIR__."/../".$dbPath."incl/lib/mainLib.php";
 		
-		$user = Library::getUserByID($score['userID']);
+		$user = Library::getUserByID($accountPost['userID']);
+		$userName = $user ? $user['userName'] : 'Undefined';
 		
 		$userMetadata = self::getUserMetadata($user);
+		
+		$accountPost['POST_USER'] = self::getUsernameString($userName, $userMetadata['mainIcon'], $userMetadata['userAppearance']['modBadgeLevel'], $userMetadata['userAttributes']);
+		$accountPost['POST_CONTENT'] = self::parseMentions($person, htmlspecialchars(Escape::url_base64_decode($accountPost['comment'])));
+		
+		$accountPost['POST_CAN_DELETE'] = ($person['userID'] == $user['userID'] || Library::checkPermission($person, "actionDeleteComment")) ? 'true' : 'false';
+			
+		return self::renderTemplate('components/post', $accountPost);
+	}
+	
+	public static function renderScoreCard($score, $person, $levelIsPlatformer, $showLevel = false) {
+		global $dbPath;
+		require_once __DIR__."/../".$dbPath."incl/lib/mainLib.php";
+		
+		$user = Library::getUserByAccountID($score['accountID']);
+		
+		$userMetadata = self::getUserMetadata($user);
+		
+		if($showLevel) {
+			$score['SCORE_LEVEL_TEXT'] = self::getLevelString($score['levelID'], $score['levelName']);
+		}
+		$score['SCORE_SHOW_LEVEL'] = $showLevel ? 'true' : 'false';
 		
 		$score['SCORE_USER'] = self::getUsernameString($user['userName'], $userMetadata['mainIcon'], $userMetadata['userAppearance']['modBadgeLevel'], $userMetadata['userAttributes']);
 		
 		$score['SCORE_IS_LEADER'] = $score['SCORE_NUMBER'] < 4 ? 'true' : 'false';
 		$score['SCORE_CAN_DELETE'] = ($person['accountID'] == $user['accountID'] || Library::checkPermission($person, "dashboardDeleteLeaderboards")) ? 'true' : 'false';
+		
+		$score['SCORE_IS_PLATFORMER'] = $levelIsPlatformer ? 'true' : 'false';
 		
 		$score['SCORE_CAN_SEE_HIDDEN'] = ($person['accountID'] == $user['accountID'] || Library::checkPermission($person, "dashboardModTools")) ? 'true' : 'false';
 		if($score['SCORE_CAN_SEE_HIDDEN'] == 'false') {
@@ -484,6 +557,29 @@ class Dashboard {
 		$song['SONG_IS_FAVOURITE'] = (is_array($favouriteSongs) && in_array($song['ID'], $favouriteSongs)) || (!is_array($favouriteSongs) && $favouriteSongs) ? 'true' : 'false';
 		
 		return self::renderTemplate('components/song', $song);
+	}
+	
+	public static function renderSFXCard($sfx, $person) {
+		global $dbPath;
+		require_once __DIR__."/../".$dbPath."incl/lib/mainLib.php";
+		
+		$user = Library::getUserByAccountID($sfx['reuploadID']);
+		
+		$userMetadata = self::getUserMetadata($user);
+		
+		$downloadLink = urlencode(urldecode($sfx["download"]));
+		
+		$sfx['SFX_IS_LOCAL'] = $sfx['isLocalSFX'] ? 'true' : 'false';
+		
+		$sfx['SFX_USER'] = $sfx['isLocalSFX'] ? self::getUsernameString($user['userName'], $userMetadata['mainIcon'], $userMetadata['userAppearance']['modBadgeLevel'], $userMetadata['userAttributes']) : '';
+		
+		$sfx['SFX_AUTHOR'] = $sfx['isLocalSFX'] ? htmlspecialchars($user['userName']) : htmlspecialchars($sfx['authorName']);
+		$sfx['SFX_NAME'] = htmlspecialchars($sfx['name']);
+		$sfx['SFX_URL'] = htmlspecialchars($downloadLink);
+		
+		$sfx['SFX_CAN_CHANGE'] = ($person['userID'] == $user['userID'] || Library::checkPermission($person, "dashboardManageSongs")) ? 'true' : 'false';
+		
+		return self::renderTemplate('components/sfx', $sfx);
 	}
 }
 ?>

@@ -9,8 +9,8 @@ $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 $levelID = Escape::number($_POST['levelID']);
-$stars = Escape::number($_POST['stars']);
-$feature = Escape::number($_POST['feature']);
+$stars = abs(Escape::number($_POST['stars']));
+$feature = abs(Escape::number($_POST['feature']));
 
 $level = Library::getLevelByID($levelID);
 if(!$level) exit(CommonError::InvalidRequest);

@@ -8,7 +8,7 @@ $sec = new Security();
 $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
-$songID = Escape::number($_POST['songID']);
+$songID = abs(Escape::number($_POST['songID']));
 
 $song = Library::getSongByID($songID);
 if(!$song) {

@@ -8,8 +8,8 @@ $sec = new Security();
 $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
-$messageID = Escape::number($_POST["messageID"]);
-$isSender = Escape::number($_POST["isSender"]) ?: 0;
+$messageID = abs(Escape::number($_POST["messageID"]) ?: 0);
+$isSender = abs(Escape::number($_POST["isSender"]) ?: 0);
 
 $message = Library::readMessage($person, $messageID, $isSender);
 if(!$message) exit(CommonError::InvalidRequest);

@@ -8,7 +8,7 @@ $sec = new Security();
 $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
-$messages = isset($_POST['messages']) ? Escape::multiple_ids($_POST['messages']) : Escape::number($_POST['messageID']);
+$messages = isset($_POST['messages']) ? Escape::multiple_ids($_POST['messages']) : abs(Escape::number($_POST['messageID']));
 
 $deleteMessages = Library::deleteMessages($person, $messages);
 if(!$deleteMessages) exit(CommonError::InvalidRequest);

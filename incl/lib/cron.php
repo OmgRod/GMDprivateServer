@@ -18,31 +18,31 @@ class Cron {
 			25 + IFNULL(moons.moons, 0) + IFNULL(dailyMoons.moons, 0) + IFNULL(eventMoons.moons, 0) + IFNULL(gauntletMoons.moons, 0) AS moons 
 			FROM (
 				-- Levels table
-				(SELECT SUM(starStars) AS stars FROM levels WHERE levelLength != 5) stars
-				JOIN (SELECT SUM(coins) AS coins FROM levels WHERE starCoins > 0) coins
-				JOIN (SELECT SUM(starDemon) AS demons FROM levels WHERE starStars > 0) demons
-				JOIN (SELECT SUM(starStars) AS moons FROM levels WHERE levelLength = 5) moons
+				(SELECT SUM(starStars) AS stars FROM levels WHERE levelLength != 5 AND isDeleted = 0) stars
+				JOIN (SELECT SUM(coins) AS coins FROM levels WHERE starCoins > 0 AND isDeleted = 0) coins
+				JOIN (SELECT SUM(starDemon) AS demons FROM levels WHERE starStars > 0 AND isDeleted = 0) demons
+				JOIN (SELECT SUM(starStars) AS moons FROM levels WHERE levelLength = 5 AND isDeleted = 0) moons
 				
 				-- Daily/Weekly levels
-				JOIN (SELECT SUM(starStars) as stars FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE levelLength != 5) dailyStars
-				JOIN (SELECT SUM(coins) as coins FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE starCoins > 0) dailyCoins
-				JOIN (SELECT SUM(starDemon) as demons FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE starStars > 0) dailyDemons
-				JOIN (SELECT SUM(starStars) as moons FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE levelLength = 5) dailyMoons
+				JOIN (SELECT SUM(starStars) as stars FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE levels.levelLength != 5 AND levels.isDeleted = 0) dailyStars
+				JOIN (SELECT SUM(coins) as coins FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE levels.starCoins > 0 AND levels.isDeleted = 0) dailyCoins
+				JOIN (SELECT SUM(starDemon) as demons FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE levels.starStars > 0 AND levels.isDeleted = 0) dailyDemons
+				JOIN (SELECT SUM(starStars) as moons FROM dailyfeatures INNER JOIN levels ON levels.levelID = dailyfeatures.levelID WHERE levels.levelLength = 5 AND levels.isDeleted = 0) dailyMoons
 				
 				-- Event levels
-				JOIN (SELECT SUM(starStars) as stars FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE levelLength != 5) eventStars
-				JOIN (SELECT SUM(coins) as coins FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE starCoins > 0) eventCoins
-				JOIN (SELECT SUM(starDemon) as demons FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE starStars > 0) eventDemons
-				JOIN (SELECT SUM(starStars) as moons FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE levelLength = 5) eventMoons
+				JOIN (SELECT SUM(starStars) as stars FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE levels.levelLength != 5 AND levels.isDeleted = 0) eventStars
+				JOIN (SELECT SUM(coins) as coins FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE levels.starCoins > 0 AND levels.isDeleted = 0) eventCoins
+				JOIN (SELECT SUM(starDemon) as demons FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE levels.starStars > 0 AND levels.isDeleted = 0) eventDemons
+				JOIN (SELECT SUM(starStars) as moons FROM events INNER JOIN levels ON levels.levelID = events.levelID WHERE levels.levelLength = 5 AND levels.isDeleted = 0) eventMoons
 				
 				-- Map Packs
 				JOIN (SELECT SUM(stars) as stars FROM mappacks) mappackStars
 				
 				-- Gauntlets
-				JOIN (SELECT SUM(starStars) as stars FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE levelLength != 5) gauntletStars
-				JOIN (SELECT SUM(coins) as coins FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE starCoins > 0) gauntletCoins
-				JOIN (SELECT SUM(starDemon) as demons FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE starStars > 0) gauntletDemons
-				JOIN (SELECT SUM(starStars) as moons FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE levelLength = 5) gauntletMoons
+				JOIN (SELECT SUM(starStars) as stars FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE levels.levelLength != 5 AND levels.isDeleted = 0) gauntletStars
+				JOIN (SELECT SUM(coins) as coins FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE levels.starCoins > 0 AND levels.isDeleted = 0) gauntletCoins
+				JOIN (SELECT SUM(starDemon) as demons FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE levels.starStars > 0 AND levels.isDeleted = 0) gauntletDemons
+				JOIN (SELECT SUM(starStars) as moons FROM levels INNER JOIN gauntlets ON levels.levelID IN (gauntlets.level1, gauntlets.level2, gauntlets.level3, gauntlets.level4, gauntlets.level5) WHERE levels.levelLength = 5 AND levels.isDeleted = 0) gauntletMoons
 			)");
 		$levelStats->execute();
 		$levelStats = $levelStats->fetch();

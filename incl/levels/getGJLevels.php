@@ -19,9 +19,9 @@ $orderSorting = "DESC";
 $orderEnabled = $isIDSearch = $noLimit = false;
 
 $str = Escape::text($_POST["str"]) ?: '';
-$gameVersion = Escape::number($_POST["gameVersion"]) ?: 18;
+$gameVersion = abs(Escape::number($_POST["gameVersion"]) ?: 18);
 
-$pageOffset = is_numeric($_POST["page"]) ? Escape::number($_POST["page"]) * 10 : 0;
+$pageOffset = is_numeric($_POST["page"]) ? abs(Escape::number($_POST["page"]) * 10) : 0;
 
 $getFilters = Library::getLevelSearchFilters($_POST, $gameVersion, false, false);
 $filters = $getFilters['filters'];

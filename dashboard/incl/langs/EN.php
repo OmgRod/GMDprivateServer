@@ -15,6 +15,7 @@ $language['main'] = 'Main';
 $language['userProfile'] = '%1$s\'s profile';
 $language['clanProfile'] = 'Clan %1$s';
 $language['levelProfile'] = 'Level %1$s';
+$language['listProfile'] = 'List %1$s';
 $language['nothingIsPlaying'] = 'Nothing is playing...';
 $language['manage'] = 'Manage';
 $language['view'] = 'View';
@@ -34,6 +35,7 @@ $language['yourSFXsTitle'] = 'Your SFXs';
 $language['browse'] = 'Browse';
 $language['levelsTitle'] = 'Levels';
 $language['songsTitle'] = 'Songs';
+$language['sfxsTitle'] = 'SFXs';
 
 $language['messengerTitle'] = 'Messenger';
 $language['loginToAccountTitle'] = 'Login to account';
@@ -65,6 +67,10 @@ $language['errorCommentingIsDisabled'] = 'Commenting is currently disabled.';
 $language['errorLevelCommentingIsDisabled'] = 'Commenting on this level is currently disabled.';
 $language['errorListCommentingIsDisabled'] = 'Commenting on this list is currently disabled.';
 
+$language['errorCantDeletePost'] = 'You can\'t delete this post.';
+$language['errorBadPost'] = 'Your post contains a bad word.';
+$language['errorPostingIsDisabled'] = 'Creating posts is disabled.';
+
 $language['errorSongNotFound'] = 'Song wasn\'t found!';
 
 /* Success strings */
@@ -82,6 +88,11 @@ $language['successUploadedComment'] = 'You successfully uploaded a comment!';
 
 $language['successFavouritedSong'] = 'You successfully favourited this song!';
 $language['successUnfavouritedSong'] = 'You successfully unfavourited this song!';
+
+$language['successAppliedSettings'] = 'You successfully applied settings!';
+
+$language['successDeletedPost'] = 'You deleted this post!';
+$language['successUploadedPost'] = 'You successfully created a post!';
 
 /* Page strings */
 $language['changeUsernameOld'] = 'Old username';
@@ -101,7 +112,12 @@ $language['levelLength'] = 'Level length';
 $language['downloads'] = 'Downloads';
 $language['likes'] = 'Likes';
 $language['dislikes'] = 'Dislikes';
+$language['rating'] = 'Rating';
 $language['viewLevel'] = 'View level';
+$language['viewComments'] = 'View comments';
+$language['viewLeaderboards'] = 'View leaderboards';
+$language['viewSongs'] = 'View songs';
+$language['viewSFXs'] = 'View SFXs';
 $language['unknownSong'] = 'Unknown song';
 $language['uploadDate'] = 'Upload date';
 $language['noLevels'] = 'No levels!';
@@ -128,6 +144,7 @@ $language['attempts'] = 'Attempts';
 $language['coins'] = 'Coins';
 $language['clicks'] = 'Clicks';
 $language['time'] = 'Time';
+$language['points'] = 'Points';
 
 $language['writeSomething'] = 'Write something!';
 $language['bannedToast'] = 'You\'re banned: "%1$s", ban will expire %2$s'; // %1$s — ban reason, %2$s — in X time
@@ -181,4 +198,37 @@ $language['levelLengthPlatformerDesc'] = 'Platformer levels';
 
 $language['resetFilters'] = 'Reset filters';
 $language['applyFilters'] = 'Apply filters';
+
+$language['reset'] = 'Reset';
+$language['applySettings'] = 'Apply settings';
+
+$language['noPosts'] = 'No posts!';
+$language['accountID'] = 'Account ID';
+$language['userID'] = 'User ID';
+$language['moons'] = 'Moons';
+$language['diamonds'] = 'Diamonds';
+$language['goldCoins'] = 'Gold coins';
+$language['userCoins'] = 'User coins';
+$language['demons'] = 'Demons';
+$language['creatorPoints'] = 'Creator Points';
+$language['registerDate'] = 'Register date';
+$language['personPosts'] = 'Person posts';
+$language['personComments'] = 'Person comments';
+$language['personScores'] = 'Person scores';
+$language['personSongs'] = 'Person songs';
+$language['personSFXs'] = 'Person SFXs';
+$language['personBans'] = 'Person bans';
+
+$language['unknownLevel'] = 'Unknown level';
+$language['unknownList'] = 'Unknown list';
+
+$language['sfxID'] = 'SFX ID';
+$language['noSFXs'] = 'No SFXs!';
+$language['downloadSFX'] = 'Download SFX';
+$language['editSFX'] = 'Edit SFX';
+$language['library'] = 'Library';
+
+$language['rank'] = 'Rank';
+
+$language['manageAccount'] = 'Manage account';
 ?>

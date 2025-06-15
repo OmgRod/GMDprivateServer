@@ -1,0 +1,159 @@
+<div class="wideBox levelPage">
+	<div class="contentDiv">
+		<div class="horisontal bigGap">
+			<div class="profilePlayerIcon">
+				<img src="%PROFILE_MAIN_ICON_URL%" />
+			</div>
+			
+			<div class="vertical">
+				<div class="horisontal spaceBetween">
+					<div class="profileTitle">
+						<h1>%PROFILE_USERNAME%</h1>
+						<img dashboard-show="%PROFILE_HAS_BADGE%" src="incl/icons/badge_%PROFILE_MODERATOR_BADGE%.png" />
+						<p style="%PROFILE_CLAN_COLOR%" dashboard-show="%PROFILE_HAS_CLAN%" title="%PROFILE_CLAN_TITLE%" href="clan/%PROFILE_CLAN_NAME%">%PROFILE_CLAN_NAME%</p>
+					</div>
+					
+					<h1 title="%TEXT_rank%" dashboard-show="%PROFILE_HAS_RANK%">
+						<i class="fa-solid fa-trophy"></i>
+						%PROFILE_RANK%
+					</h1>
+				</div>
+				
+				<div class="iconKitDiv">
+					<img class="profileIconBig" src="%PROFILE_ICON_CUBE%" />
+					<img class="profileIconSmall" src="%PROFILE_ICON_SHIP%" />
+					<img class="profileIconBig" src="%PROFILE_ICON_BALL%" />
+					<img class="profileIconBig" src="%PROFILE_ICON_UFO%" />
+					<img class="profileIconSmall" src="%PROFILE_ICON_WAVE%" />
+					<img class="profileIconBig" src="%PROFILE_ICON_ROBOT%" />
+					<img class="profileIconBig" src="%PROFILE_ICON_SPIDER%" />
+					<img class="profileIconBig" src="%PROFILE_ICON_SWING%" />
+					<img class="profileIconBig" src="%PROFILE_ICON_JETPACK%" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="horisontal">
+		<div class="levelStats">
+			<div class="levelStat several">
+				<text title="%TEXT_accountID%">
+					<i class="fa-solid fa-user"></i>
+					<text dashboard-copy>%extID%</text>
+				</text>
+				
+				<text title="%TEXT_userID%">
+					<i class="fa-regular fa-user"></i>
+					<text dashboard-copy>%userID%</text>
+				</text>
+			</div>
+			
+			<div class="levelStat" title="%TEXT_stars%">
+				<i class="fa-solid fa-star"></i>
+				%stars%
+			</div>
+			
+			<div class="levelStat" title="%TEXT_moons%">
+				<i class="fa-solid fa-moon"></i>
+				%moons%
+			</div>
+			
+			<div class="levelStat" title="%TEXT_diamonds%">
+				<i class="fa-solid fa-gem"></i>
+				%diamonds%
+			</div>
+			
+			<div class="levelStat" title="%TEXT_goldCoins%">
+				<i class="fa-solid fa-coins goldCoins"></i>
+				%coins%
+			</div>
+			
+			<div class="levelStat" title="%TEXT_userCoins%">
+				<i class="fa-solid fa-coins"></i>
+				%userCoins%
+			</div>
+			
+			<div class="levelStat" title="%TEXT_demons%">
+				<i class="fa-solid fa-dragon"></i>
+				%demons%
+			</div>
+			
+			<div class="levelStat" title="%TEXT_creatorPoints%">
+				<i class="fa-solid fa-screwdriver-wrench"></i>
+				%creatorPoints%
+			</div>
+		
+			<text class="levelStat" title="%TEXT_registerDate%">
+				<i class="fa-solid fa-calendar"></i>
+				<text dashboard-date="%PROFILE_REGISTER_DATE%" dashboard-full></text>
+			</text>
+			
+			<div class="levelStat several" title="%TEXT_personPosts%">
+				<text>
+					<i class="fa-solid fa-comment-dots"></i>
+					%PROFILE_POSTS_COUNT%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+			
+			<div class="levelStat several" title="%TEXT_personComments%">
+				<text>
+					<i class="fa-solid fa-comment"></i>
+					%PROFILE_COMMENTS_COUNT%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%/comments')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+			
+			<div class="levelStat several" title="%TEXT_personScores%">
+				<text>
+					<i class="fa-solid fa-chart-simple"></i>
+					%PROFILE_SCORES_COUNT%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%/scores')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+			
+			<div class="levelStat several" title="%TEXT_personSongs%">
+				<text>
+					<i class="fa-solid fa-music"></i>
+					%PROFILE_SONGS_COUNT%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%/songs')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+			
+			<div class="levelStat several" title="%TEXT_personSFXs%">
+				<text>
+					<i class="fa-solid fa-drum"></i>
+					%PROFILE_SFXS_COUNT%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%/sfxs')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+			
+			<div class="levelStat several" title="%TEXT_personBans%" dashboard-show="%PROFILE_CAN_SEE_BANS%">
+				<text>
+					<i class="fa-solid fa-gavel"></i>
+					%PROFILE_BANS_COUNT%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%/bans')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+			
+			<div class="levelStat several" dashboard-show="%PROFILE_CAN_MANAGE%" title="%TEXT_manageAccount%">
+				<text>
+					<i class="fa-solid fa-pencil"></i>
+					%TEXT_manage%
+				</text>
+				
+				<button type="button" class="eyeButton" onclick="getPage('profile/%PROFILE_USERNAME%/manage')"><i class="fa-solid fa-eye"></i></button>
+			</div>
+		</div>
+		
+		<div class="commentsDiv" dashboard-page-div>
+			%PROFILE_ADDITIONAL_PAGE%
+		</div>
+	</div>
+</div>

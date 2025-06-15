@@ -18,6 +18,11 @@
 			
 			localStorage.language = "%LANGUAGE%";
 		</script>
+		<style id="dashboardStyle">
+			:root {
+				--href-color: %DASHBOARD_ACCENT_COLOR%;
+			}
+		</style>
 		<script async src="incl/script.js?%SCRIPT_TIMESTAMP%" type="text/javascript"></script>
 		<script async src="incl/player.js" type="text/javascript"></script>
 		<script async src="incl/toast/toast.js" type="text/javascript"></script>
@@ -73,7 +78,7 @@
 						
 						<button title="%TEXT_yourSFXsTitle%" type="button" href="account/sfxs">
 							<i class="fa-solid fa-drum"></i>
-							<text>%TEXT_yourSFXsTitle% (X)</text>
+							<text>%TEXT_yourSFXsTitle%</text>
 						</button>
 					</div>
 				</div>
@@ -94,6 +99,11 @@
 							<i class="fa-solid fa-music"></i>
 							<text>%TEXT_songsTitle%</text>
 						</button>
+						
+						<button title="%TEXT_sfxsTitle%" type="button" href="browse/sfxs">
+							<i class="fa-solid fa-drum"></i>
+							<text>%TEXT_sfxsTitle%</text>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -113,7 +123,7 @@
 					<div class="dropdown-items">
 						<button title="%TEXT_settings%" type="button" href="settings">
 							<i class="fa-solid fa-gear"></i>
-							<text>%TEXT_settings% (X)</text>
+							<text>%TEXT_settings%</text>
 						</button>
 						
 						<button title="%TEXT_loginToAccountTitle%" dashboard-hide="%IS_LOGGED_IN%" type="button" href="account/login">
@@ -132,7 +142,7 @@
 					<div class="dropdown-items">
 						<button title="%TEXT_yourProfileTitle%" type="button" href="profile/%USERNAME%">
 							<i class="fa-solid fa-user"></i>
-							<text>%TEXT_yourProfileTitle% (X)</text>
+							<text>%TEXT_yourProfileTitle%</text>
 						</button>
 						
 						<button title="%TEXT_settings%" type="button" href="settings">
@@ -187,12 +197,12 @@
 		<footer>%FOOTER%</footer>
 		
 		<div class="circles">
-			<div class="circle red" style='--position-delay: -1s'></div>
-			<div class="circle green" style='--position-delay: -5s'></div>
-			<div class="circle blue" style='--position-delay: -9s'></div>
-			<div class="circle red" style='--position-delay: -14s'></div>
-			<div class="circle green" style='--position-delay: -19s'></div>
-			<div class="circle blue" style='--position-delay: -24s'></div>
+			<div class="circle" style='--position-delay: -1s'></div>
+			<div class="circle" style='--position-delay: -5s'></div>
+			<div class="circle" style='--position-delay: -9s'></div>
+			<div class="circle" style='--position-delay: -14s'></div>
+			<div class="circle" style='--position-delay: -19s'></div>
+			<div class="circle" style='--position-delay: -24s'></div>
 		</div>
 	</body>
 </html>

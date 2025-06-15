@@ -12,8 +12,8 @@ if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 if(!is_numeric($_POST["levelID"])) exit(CommonError::InvalidRequest);
 
-$levelID = Escape::multiple_ids($_POST["levelID"]);
-$gameVersion = !empty($_POST["gameVersion"]) ? Escape::number($_POST["gameVersion"]) : 1;
+$levelID = Escape::number($_POST["levelID"]);
+$gameVersion = !empty($_POST["gameVersion"]) ? abs(Escape::number($_POST["gameVersion"])) : 1;
 $extras = !empty($_POST["extras"]) && $_POST["extras"];
 
 $feaID = 0;

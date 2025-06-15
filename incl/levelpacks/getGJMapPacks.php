@@ -9,7 +9,7 @@ $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
 $mapPackString = '';
-$page = Escape::number($_POST['page']) ?: 0;
+$page = abs(Escape::number($_POST['page']) ?: 0);
 $pageOffset = $page * 10;
 
 $mapPacks = Library::getMapPacks($pageOffset);

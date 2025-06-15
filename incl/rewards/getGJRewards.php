@@ -15,7 +15,7 @@ $userID = $person["userID"];
 $time = time();
 $smallChestStuff = $bigChestStuff = '0,0,0,0';
 
-$rewardType = Escape::number($_POST["rewardType"]);
+$rewardType = abs(Escape::number($_POST["rewardType"]));
 $chk = XORCipher::cipher(Escape::url_base64_decode(substr(Escape::latin($_POST["chk"]), 5)), 59182);
 $udid = Escape::text($_POST["udid"]);
 

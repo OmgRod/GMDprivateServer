@@ -9,8 +9,8 @@ $sec = new Security();
 $person = $sec->loginPlayer();
 if(!$person["success"]) exit(CommonError::InvalidRequest);
 
-$levelID = Escape::multiple_ids($_POST['levelID']);
-$gameVersion = Escape::number($_POST['gameVersion']);
+$levelID = Escape::number($_POST['levelID']);
+$gameVersion = abs(Escape::number($_POST['gameVersion']));
 $comment = Escape::text($_POST['comment']);
 $percent = Escape::number($_POST['percent']) ?: 0;
 

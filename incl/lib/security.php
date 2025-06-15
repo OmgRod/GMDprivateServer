@@ -125,7 +125,7 @@ class Security {
 		
 		if(self::isTooManyAttempts()) {
 			$logPerson = [
-				'accountID' => (string)Escape::number($_POST['accountID']),
+				'accountID' => (string)abs(Escape::number($_POST['accountID'])),
 				'userID' => 0,
 				'userName' => '',
 				'IP' => $IP
@@ -134,12 +134,12 @@ class Security {
 			Library::logAction($logPerson, Action::FailedLogin);
 			self::checkRateLimits($logPerson, 5);
 			
-			return ["success" => false, "error" => LoginError::WrongCredentials, "accountID" => (string)Escape::number($_POST['accountID']), "IP" => $IP];
+			return ["success" => false, "error" => LoginError::WrongCredentials, "accountID" => $logPerson['accountID'], "IP" => $IP];
 		}
 		
 		switch(true) {
 			case !empty($_POST['uuid']) && (!empty($_POST['password']) || !empty($_POST['gjp']) || !empty($_POST['gjp2']) || !empty($_POST['auth'])):
-				$userID = Escape::number($_POST['uuid']);
+				$userID = abs(Escape::number($_POST['uuid']));
 				$accountID = Library::getAccountID($userID);
 				break;
 			case empty($_POST['password']) && empty($_POST['gjp']) && empty($_POST['gjp2']) && empty($_POST['auth']):
@@ -147,10 +147,10 @@ class Security {
 				
 				$udid = isset($_POST['udid']) ? Escape::text($_POST['udid']) : '';
 				$userName = isset($_POST['userName']) ? Escape::latin($_POST['userName']) : "Undefined";
-				$accountID = isset($_POST['accountID']) ? Escape::number($_POST['accountID']) : 0;
+				$accountID = isset($_POST['accountID']) ? abs(Escape::number($_POST['accountID'])) : 0;
 				
 				if(empty($_POST['uuid']) && !empty($accountID)) $userID = Library::getUserID($accountID);
-				else $userID = Escape::number($_POST['uuid']) ?: 0;
+				else $userID = abs(Escape::number($_POST['uuid']) ?: 0);
 				
 				$verifyUDID = self::verifyUDID($userID, $udid, $userName);
 				if(!$verifyUDID) {
@@ -176,7 +176,7 @@ class Security {
 				$accountID = Library::getAccountIDWithUserName($userName);
 				break;
 			default:
-				$accountID = Escape::number($_POST['accountID']);
+				$accountID = abs(Escape::number($_POST['accountID']));
 				break;
 		}
 		
@@ -494,7 +494,7 @@ class Security {
 			case 5:
 				if(!$maxLoginTries) return true;
 				
-				$searchFilters = ['type = '.Action::FailedLogin, 'timestamp >= '.time() - 3600];
+				$searchFilters = ['type = '.Action::FailedLogin, 'timestamp >= '.time() - $rateLimitBanTime];
 				$isRateLimited = Library::getPersonActions($person, $searchFilters);
 				
 				if(count($isRateLimited) > $maxLoginTries) {
@@ -510,7 +510,27 @@ class Security {
 				$isRateLimited = Library::getPersonActions($person, $searchFilters);
 				
 				if(count($isRateLimited) > $maxACEExploitTries) {
-					Library::banPerson(0, $person, "Good levels, buddy!", 4, 2, (time() + $rateLimitBanTime), "Person tried to post malicious levels too much. (".count($isRateLimited)." > ".$maxACEExploitTries.")");
+					Library::banPerson(0, $person, "You exceeded rate limit for posting malicious levels.", 4, 2, (time() + $rateLimitBanTime), "Person tried to post malicious levels too much. (".count($isRateLimited)." > ".$maxACEExploitTries.")");
+					return false;
+				}
+				
+				return true;
+			case 7:
+				if(!$backupAccountDelay) return true;
+				
+				$searchFilters = ['type = '.Action::SuccessfulAccountBackup, 'timestamp >= '.time() - $backupAccountDelay];
+				$checkBackup = Library::getPersonActions($person, $searchFilters);
+				
+				if($checkBackup) {
+					Library::logAction($person, Action::AccountBackupRateLimit);
+					
+					$searchFilters = ['type = '.Action::AccountBackupRateLimit, 'timestamp >= '.time() - $rateLimitBanTime];
+					$isRateLimited = Library::getPersonActions($person, $searchFilters);
+					
+					if(count($isRateLimited) > $backupAccountDelay * $rateLimitBanMultiplier) {
+						Library::banPerson(0, $person, "You exceeded rate limit for backuping account.", 4, 2, (time() + $rateLimitBanTime), "Person tried to backup their account too much. (".count($isRateLimited)." > ".$backupAccountDelay." * ".$rateLimitBanMultiplier.")");
+					}
+					
 					return false;
 				}
 				
@@ -653,11 +673,9 @@ class Security {
 			if($magic === '1f8b08' || substr($magic, 0, 2) === '78') {
 				$data = zlib_decode($data, $maxUncompressedLevelSize);
 				if(!$data) return false;
-			} else {
-				if(strlen($data) > $maxUncompressedLevelSize) return false;
 			}
 			
-			if(!$enableACEExploitCheck) return true;
+			if(!$enableACEExploitCheck || strlen($data) > $maxUncompressedLevelSize) return false;			
 			
 			// Check if result invalid (any character outside ascii range). Better heuristic for detecting junk?
 			if(preg_match('/[^\x20-\x7e]/', $data)) return false;
