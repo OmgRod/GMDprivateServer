@@ -118,7 +118,7 @@ if($accid != $_SESSION["accountID"] && is_numeric($accid)) {
   		</form>
 	</div>'));
 }
-if(!empty($_POST["msg"])) {
+if($accid == $_SESSION["accountID"] && $accid != 0 && !empty($_POST["msg"])) {
 	if(Automod::isAccountsDisabled(1)) die($dl->printSong('<div class="form">
 	<h1>'.$dl->getLocalizedString("errorGeneric").'</h1>
        	<form class="form__inner" method="post" action="">

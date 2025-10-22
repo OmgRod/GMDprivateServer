@@ -90,12 +90,12 @@ if(isset($_POST["userName"]) && isset($_POST["password"])) {
   	$query = $db->prepare("SELECT auth FROM accounts WHERE accountID = :id");
   	$query->execute([':id' => $accountID]);
   	$auth = $query->fetch();
-    if($auth["auth"] == 'none') {
+    if(empty($auth["auth"]) || $auth["auth"] == 'none') {
           $auth = $gs->randomString(8);
           $query = $db->prepare("UPDATE accounts SET auth = :auth WHERE accountID = :id");
           $query->execute([':auth' => $auth, ':id' => $accountID]);
-		  setcookie('auth', $auth, 2147483647, '/');
-    } else setcookie('auth', $auth["auth"], 2147483647, '/');
+		  setcookie('auth', $auth, 2147483647, '/', '', true, true);
+    } else setcookie('auth', $auth["auth"], 2147483647, '/', '', true, true);
 	if(!empty($_SERVER["HTTP_REFERER"])) header('Location: '.$_SERVER["HTTP_REFERER"]);
 	else header('Location: ../');
 } else {
